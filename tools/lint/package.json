@@ -1,0 +1,13 @@
+{
+  "name": "nox-lint",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "The linter, kept apart from the site: its TypeScript parser needs the JavaScript compiler API, which the site's TypeScript 7 does not ship.",
+  "devDependencies": {
+    "eslint": "10.14.0",
+    "eslint-plugin-react-hooks": "7.1.1",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.72.2"
+  }
+}

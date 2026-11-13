@@ -1,0 +1,1036 @@
+/* Chapter 3, Device power: the flats at night. The header, the
+   caveat band and the pinned stage share the plate's own sky colour, so they
+   meet with no seam; the plate is the whole stage. */
+.chapter--device-power {
+  --dp-sky: #04091f;
+  --dp-move: 0.9s;
+  --dp-ease: cubic-bezier(0.45, 0, 0.2, 1);
+}
+.chapter--device-power .chapter-head {
+  position: relative;
+  isolation: isolate;
+  background: var(--dp-sky);
+}
+.chapter--device-power .chapter-head::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(180deg, var(--canvas) 0, transparent 220px);
+}
+.chapter--device-power .chapter-intro {
+  color: #c9cde0;
+}
+.chapter--device-power .chapter-dawn {
+  background: linear-gradient(180deg, var(--dp-sky) 0%, #1b2350 25%, #8fa6d6 58%, #e8c9b4 80%, var(--light) 100%);
+}
+.dp-caveat-band {
+  padding-top: clamp(40px, 7svh, 72px);
+  padding-bottom: var(--caveat-gap);
+  background: var(--dp-sky);
+}
+.dp-caveat-band .dp-caveat {
+  margin-top: 0;
+  padding-bottom: 8px;
+  color: #c9cde0;
+  text-wrap: balance;
+}
+
+.dp-scene {
+  position: relative;
+  height: calc(100svh - 60px + var(--steps, 8) * 85svh);
+  background: var(--dp-sky);
+}
+.dp-stage {
+  position: sticky;
+  top: 60px;
+  height: calc(100svh - 60px);
+  overflow: hidden;
+  background: var(--dp-sky);
+}
+.dp-track {
+  position: absolute;
+  inset: 0 0 auto;
+  pointer-events: none;
+}
+.dp-marker {
+  height: 85svh;
+}
+.dp-card {
+  display: none;
+}
+.dp-view {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: var(--dp-sky);
+}
+/* The world is the plate at its own size; one transform frames each step, and
+   tags and controls move with the same duration and easing, so they stay on it. */
+.dp-world {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 2880px;
+  height: 1800px;
+  transform-origin: 0 0;
+  transition: transform var(--dp-move) var(--dp-ease);
+  will-change: transform;
+}
+.dp-plate-img {
+  position: absolute;
+  inset: 0;
+  width: 2880px;
+  height: 1800px;
+  max-width: none;
+  filter: brightness(0.72) saturate(0.88);
+}
+.dp-overlay {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+}
+.dp-sky-fade {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 120px;
+  background: linear-gradient(180deg, var(--dp-sky), transparent);
+  pointer-events: none;
+}
+.dp-exit-fade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 30%, var(--dp-sky) 100%);
+  opacity: calc(var(--exit, 0) * 3);
+  pointer-events: none;
+}
+.dp-stage.reflow .dp-world,
+.dp-stage.reflow .dp-tag,
+.dp-stage.reflow .dp-tag::before,
+.dp-stage.reflow .dp-tag-body,
+.dp-stage.reflow .dp-ctl {
+  transition: none;
+}
+
+/* Corridors (power resources), rooms (devices), plates (found on the bus), wires (_PRW). */
+.dp-corr-dark {
+  fill: #01030b;
+  opacity: 0.5;
+  transition: opacity 0.6s ease;
+}
+.dp-level[data-on="true"] .dp-corr-dark {
+  opacity: 0;
+}
+.dp-corr-glow {
+  fill: url(#dp-corr);
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+.dp-level[data-on="true"] .dp-corr-glow {
+  opacity: 1;
+}
+.dp-tube {
+  fill: #2b3142;
+  transition: fill 0.4s ease;
+}
+.dp-level[data-on="true"] .dp-tube {
+  fill: #f2f6ff;
+}
+.dp-switch {
+  fill: #3a4157;
+  stroke: #9aa3bd;
+  stroke-width: 2;
+}
+.dp-lever {
+  fill: #ede6d3;
+  transition: transform 0.3s var(--dp-ease);
+  transform-box: fill-box;
+}
+.dp-level[data-on="false"] .dp-lever {
+  transform: translateY(16px);
+}
+.dp-lever.spring {
+  animation: dp-spring 0.7s var(--dp-ease);
+}
+.dp-corr-glow.dip {
+  animation: dp-dip 0.7s var(--dp-ease);
+}
+/* Step 6: the switch keeps trying and springs back; the light dips each time. */
+.dp-level.held .dp-lever {
+  animation: dp-spring-loop 2.6s var(--dp-ease) infinite;
+}
+.dp-level.held .dp-corr-glow,
+.dp-level.held .dp-tube {
+  animation: dp-dip-loop 2.6s var(--dp-ease) infinite;
+}
+@keyframes dp-spring {
+  30% {
+    transform: translateY(16px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+@keyframes dp-dip {
+  30% {
+    opacity: 0.35;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes dp-spring-loop {
+  0%,
+  30% {
+    transform: translateY(0);
+  }
+  42% {
+    transform: translateY(16px);
+  }
+  60%,
+  100% {
+    transform: translateY(0);
+  }
+}
+@keyframes dp-dip-loop {
+  0%,
+  30% {
+    opacity: 1;
+  }
+  42% {
+    opacity: 0.35;
+  }
+  60%,
+  100% {
+    opacity: 1;
+  }
+}
+.dp-neighbour {
+  fill: url(#dp-cool);
+  opacity: 0.55;
+}
+.dp-room {
+  fill: #0a0f1d;
+  transition: fill 0.6s ease;
+}
+.dp-lamp {
+  fill: url(#dp-lamp);
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+.dp-flat[data-d="D0"] .dp-lamp {
+  opacity: 1;
+}
+.dp-flat[data-d="D2"] .dp-lamp {
+  opacity: 0.45;
+}
+.dp-flat[data-d="D0"] .dp-room {
+  fill: #3a2a17;
+}
+.dp-flat[data-d="D2"] .dp-room {
+  fill: #22190f;
+}
+.dp-desk {
+  fill: none;
+  stroke: #8b7a5f;
+  stroke-width: 3;
+}
+.dp-flat[data-d="D0"] .dp-desk,
+.dp-flat[data-d="D2"] .dp-desk {
+  stroke: #d9b98a;
+}
+.dp-thing {
+  transition: opacity 0.35s ease;
+}
+.dp-thing.gone {
+  opacity: 0;
+}
+/* Restoring context: things come back one by one, slowest from D3cold. */
+.dp-flat.restoring .dp-thing {
+  animation: dp-back 0.35s ease both;
+  animation-delay: calc(0.3s + (var(--i) + 1) * 0.2s);
+}
+.dp-flat.restoring.slow .dp-thing {
+  animation-delay: calc(0.3s + (var(--i) + 1) * 0.52s);
+}
+@keyframes dp-back {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.dp-box {
+  fill: none;
+  stroke: #c8bfa6;
+  stroke-width: 2.5;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+.dp-flat.boxed .dp-box {
+  opacity: 0.85;
+}
+.dp-grille {
+  stroke: #cfd3dc;
+  stroke-width: 2.5;
+  opacity: 0.55;
+}
+.dp-plate {
+  fill: #232838;
+  transition: fill 0.4s ease;
+}
+.dp-flat[data-found="true"] .dp-plate {
+  fill: #ede6d3;
+}
+.dp-plate-glow {
+  fill: #ede6d3;
+  opacity: 0;
+  filter: url(#dp-soft);
+  transition: opacity 0.4s ease;
+}
+.dp-flat[data-found="true"] .dp-plate-glow {
+  opacity: 0.5;
+}
+.dp-answer {
+  fill: #ffffff;
+  opacity: 0;
+  filter: url(#dp-soft);
+}
+.dp-wire {
+  fill: none;
+  stroke: #6c7594;
+  stroke-width: 3;
+  stroke-dasharray: 6 10;
+  opacity: 0.35;
+  transition:
+    opacity 0.4s ease,
+    stroke 0.4s ease;
+}
+.dp-wire[data-armed="true"] {
+  stroke: #dce6ff;
+  stroke-dasharray: none;
+  opacity: 0.9;
+  filter: url(#dp-soft-line);
+}
+.dp-pulse {
+  fill: #ffffff;
+  opacity: 0;
+  filter: url(#dp-soft);
+}
+.dp-scan {
+  fill: #9fd3ff;
+  filter: url(#dp-soft);
+}
+.dp-bell {
+  fill: #3a4157;
+  stroke: #dce6ff;
+  stroke-width: 2;
+}
+
+/* Labels on the figure (the shared standard): a dot on the part, a hairline, bare text on a
+   quiet place (the parapets). No box, border or backdrop; only a soft shadow under the letters.
+   The tag is a point at the dot, in plate coordinates; --lead is the hairline's length in px. */
+.dp-tags {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  pointer-events: none;
+  opacity: calc(1 - var(--exit, 0) * 3);
+}
+/* The dot and hairline cross lit corridors here, so they carry a dark edge that chapter 5's do not need.
+   A label new to a step fades in once the camera has nearly arrived. */
+.dp-tag {
+  --tag-move: var(--dp-move) var(--dp-ease);
+  position: absolute;
+  width: 0;
+  height: 0;
+  transition:
+    left var(--tag-move),
+    top var(--tag-move);
+  animation: dp-tag-in 0.4s ease 0.5s both;
+}
+@keyframes dp-tag-in {
+  from {
+    opacity: 0;
+  }
+}
+.dp-tag::after {
+  content: "";
+  position: absolute;
+  left: -2.5px;
+  top: -2.5px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #ede6d3;
+  box-shadow: 0 0 0 1.5px rgba(4, 9, 31, 0.9);
+}
+.dp-tag::before {
+  content: "";
+  position: absolute;
+  left: -0.5px;
+  top: 0;
+  width: 1px;
+  height: var(--lead);
+  background: rgba(237, 230, 211, 0.85);
+  box-shadow:
+    0 0 0 0.5px rgba(4, 9, 31, 0.8),
+    0 0 2px rgba(0, 0, 0, 0.7);
+  transition:
+    height var(--tag-move),
+    width var(--tag-move),
+    top var(--tag-move),
+    left var(--tag-move);
+}
+.dp-tag-body {
+  position: absolute;
+  display: grid;
+  width: max-content;
+  white-space: nowrap;
+  line-height: 1.2;
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.95),
+    0 0 5px rgba(0, 0, 0, 0.9),
+    0 0 12px rgba(0, 0, 0, 0.9),
+    0 0 26px rgba(0, 0, 0, 0.7);
+  transition:
+    top var(--tag-move),
+    bottom var(--tag-move),
+    right var(--tag-move);
+}
+.dp-tag.below .dp-tag-body {
+  left: -1px;
+  top: calc(var(--lead) + 2px);
+}
+.dp-tag.belowRight .dp-tag-body {
+  right: -1px;
+  top: calc(var(--lead) + 2px);
+  text-align: right;
+}
+.dp-tag.aboveRight::before {
+  top: calc(-1 * var(--lead));
+}
+.dp-tag.aboveRight .dp-tag-body {
+  right: -1px;
+  bottom: calc(var(--lead) + 2px);
+  text-align: right;
+}
+.dp-tag.left::before {
+  left: calc(-1 * var(--lead));
+  top: -0.5px;
+  width: var(--lead);
+  height: 1px;
+}
+.dp-tag.left .dp-tag-body {
+  right: calc(var(--lead) + 6px);
+  top: 0;
+  transform: translateY(-50%);
+  text-align: right;
+}
+.dp-tag-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+.dp-tag-state {
+  font-size: 13px;
+  color: #d5dae8;
+}
+.dp-tag-state b {
+  color: var(--text);
+  font-weight: 600;
+}
+.dp-tag[data-tone="awake"] .dp-tag-state b {
+  color: var(--glow);
+}
+.dp-tag[data-tone="cold"] .dp-tag-state b {
+  color: #9fb2e0;
+}
+.dp-tag-note {
+  color: #c3c8d8;
+}
+.dp-tag-note.warn {
+  color: #ffd59a;
+}
+
+.dp-moon {
+  position: absolute;
+  z-index: 2;
+  top: 64px;
+  right: clamp(16px, 4vw, 64px);
+  display: grid;
+  justify-items: end;
+  gap: 4px;
+  pointer-events: none;
+  opacity: calc(1 - var(--exit, 0) * 1.6);
+}
+.dp-moon svg {
+  width: 64px;
+  height: 64px;
+}
+.dp-moon-dark {
+  opacity: 0.16;
+}
+.dp-moon-word {
+  margin: 0;
+  font-size: 12px;
+  color: var(--board-muted);
+}
+
+.dp-rail {
+  position: absolute;
+  z-index: 3;
+  top: 12px;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 12px;
+}
+.dp-chip {
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid #737c97;
+  background: rgba(4, 9, 31, 0.45);
+  color: #c9cde0;
+  font: 600 14px var(--sans);
+  cursor: pointer;
+}
+.dp-chip-n {
+  opacity: 0.7;
+  margin-right: 2px;
+}
+.dp-chip[aria-checked="true"] {
+  background: #ede6d3;
+  border-color: #ede6d3;
+  color: #101425;
+}
+.dp-chip[aria-checked="true"] .dp-chip-n {
+  opacity: 1;
+}
+.dp-chip-play {
+  border-color: var(--glow);
+}
+.dp-chip:focus-visible,
+.dp-ctl:focus-visible,
+.dp-act:focus-visible {
+  outline: 2px solid #9db7e8;
+  outline-offset: 3px;
+}
+
+/* The words: the right third, over the quiet trees; a soft dark falloff, no box. */
+.dp-words-col {
+  position: absolute;
+  z-index: 2;
+  right: clamp(20px, 4vw, 72px);
+  top: 0;
+  bottom: 0;
+  width: min(430px, 31vw);
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+}
+.dp-words-col::before {
+  content: "";
+  position: absolute;
+  inset: -10% -40% -10% -30%;
+  background: radial-gradient(closest-side, rgba(4, 9, 31, 0.82), rgba(4, 9, 31, 0.55) 60%, transparent);
+  z-index: -1;
+}
+.dp-words {
+  pointer-events: auto;
+}
+.dp-pos {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--board-muted);
+}
+.dp-title {
+  margin: var(--step-title-gap);
+  font: var(--step-title);
+  letter-spacing: -0.01em;
+}
+.dp-text.twotone {
+  margin: 0;
+  max-width: none;
+  font: var(--step-text);
+  color: var(--board-muted);
+}
+.dp-rule {
+  position: relative;
+  margin: var(--step-rule-gap) 0 0;
+  padding-top: var(--step-rule-pad);
+  font-size: var(--step-rule);
+  line-height: 1.5;
+  color: #d6d9e6;
+}
+.dp-rule::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 36px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--step-cream);
+  opacity: 0.8;
+}
+.dp-rule b {
+  color: var(--step-cream);
+  font-weight: 600;
+}
+.dp-story.twotone {
+  margin: 18px 0 0;
+  max-width: none;
+  font-size: clamp(18px, 1.5vw, 22px);
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--board-muted);
+}
+.dp-hint {
+  margin: 12px 0 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--board-muted);
+}
+.dp-acts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+.dp-act {
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid #dce6ff;
+  background: rgba(4, 9, 31, 0.5);
+  color: var(--text);
+  font: 600 14px var(--sans);
+  cursor: pointer;
+}
+
+/* Your turn: controls on the building (switches at the stairwell, bells by the doors, the gate). */
+.dp-controls {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+.dp-ctl {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid #8a93b0;
+  background: rgba(4, 9, 31, 0.72);
+  color: var(--text);
+  font: 600 12px var(--sans);
+  white-space: nowrap;
+  cursor: pointer;
+  pointer-events: auto;
+  transition:
+    left var(--dp-move) var(--dp-ease),
+    top var(--dp-move) var(--dp-ease);
+}
+.dp-ctl.inline {
+  position: static;
+  transform: none;
+}
+.dp-ctl[aria-pressed="true"] {
+  border-color: #dce6ff;
+  box-shadow: 0 0 0 1px #dce6ff inset;
+}
+.dp-ctl.light[aria-pressed="false"] {
+  border-style: dashed;
+  color: #9fb2e0;
+}
+.dp-ctl.gate {
+  border-color: var(--glow);
+}
+.dp-ctl.shake.s0 {
+  animation: dp-shake0 0.5s ease;
+}
+.dp-ctl.shake.s1 {
+  animation: dp-shake1 0.5s ease;
+}
+@keyframes dp-shake0 {
+  20%,
+  60% {
+    translate: -5px 0;
+  }
+  40%,
+  80% {
+    translate: 5px 0;
+  }
+}
+@keyframes dp-shake1 {
+  20%,
+  60% {
+    translate: -5px 0;
+  }
+  40%,
+  80% {
+    translate: 5px 0;
+  }
+}
+.dp-card-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+/* ?static and reduced motion: no pinning, no motion, the rail chooses the step. */
+.still .dp-scene {
+  height: auto;
+}
+.still .dp-stage {
+  position: relative;
+  top: auto;
+  height: calc(100svh - 60px);
+  min-height: 640px;
+}
+.still .dp-track {
+  display: none;
+}
+.still .dp-tag {
+  animation: none;
+}
+.still .dp-level.held .dp-lever,
+.still .dp-level.held .dp-corr-glow,
+.still .dp-level.held .dp-tube,
+.still .dp-flat.restoring .dp-thing {
+  animation: none;
+}
+
+/* Narrow (below 1060 px, as NARROW in src/model/layout.ts): the figure is pinned on top;
+   each step's words scroll past beneath it in a card. */
+@media (max-width: 1059px) {
+  .dp-view {
+    top: calc(var(--rail-b, 52px) + 12px);
+    bottom: auto;
+    height: 52svh;
+  }
+  .dp-view::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 0;
+    height: 36px;
+    background: linear-gradient(180deg, transparent, var(--dp-sky));
+    pointer-events: none;
+  }
+  .dp-stage {
+    z-index: 3;
+    height: calc(var(--rail-b, 52px) + 12px + 52svh);
+    box-shadow: 0 -60px 0 0 var(--dp-sky);
+  }
+  .dp-sky-fade {
+    height: 40px;
+  }
+  .dp-moon {
+    top: calc(var(--rail-b, 52px) + 20px);
+    right: 12px;
+  }
+  .dp-moon svg {
+    width: 44px;
+    height: 44px;
+  }
+  .dp-moon-word {
+    font-size: 11px;
+    max-width: 130px;
+    text-align: right;
+  }
+  .dp-words-col {
+    display: none;
+  }
+  /* One line: the name, then the state word. */
+  .dp-tag-body {
+    display: flex;
+    gap: 5px;
+    align-items: baseline;
+  }
+  /* The wake note by the bell is a sentence, not a name and a state: it keeps two lines. */
+  .dp-tag.left .dp-tag-body {
+    display: grid;
+  }
+  .dp-tag-name,
+  .dp-tag-state {
+    font-size: 12px;
+  }
+  .dp-tag-note {
+    display: none;
+  }
+  .dp-track {
+    z-index: 2;
+  }
+  .dp-marker {
+    padding-top: calc(var(--rail-b, 52px) + 24px + 52svh);
+  }
+  .dp-card {
+    display: block;
+    width: min(640px, 92vw);
+    margin: 0 auto;
+    padding: 18px 18px 20px;
+    border-radius: 18px;
+    background: rgba(4, 9, 31, 0.92);
+    pointer-events: auto;
+  }
+  .still .dp-stage {
+    height: auto;
+    min-height: 0;
+  }
+  .still .dp-view {
+    position: relative;
+    top: auto;
+    margin-top: calc(var(--rail-b, 52px) + 12px);
+  }
+  .still .dp-words-col {
+    display: flex;
+    position: relative;
+    width: auto;
+    right: auto;
+    padding: 20px 20px 24px;
+  }
+  .still .dp-words-col::before {
+    display: none;
+  }
+}
+/* Phones: the rail is one row of numbers, so the figure starts right under it;
+   the moon stays, its words are in step 1's text. */
+@media (max-width: 480px) {
+  .dp-view {
+    height: 42svh;
+  }
+  .dp-stage {
+    height: calc(var(--rail-b, 52px) + 12px + 42svh);
+  }
+  .dp-marker {
+    padding-top: calc(var(--rail-b, 52px) + 24px + 42svh);
+  }
+  .dp-moon {
+    right: 10px;
+  }
+  .dp-moon svg {
+    width: 36px;
+    height: 36px;
+  }
+  .dp-moon-word {
+    display: none;
+  }
+  .dp-chip {
+    min-height: 32px;
+    padding: 0 9px;
+    font-size: 13px;
+  }
+  .dp-chip:not([aria-checked="true"]) .dp-chip-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+/* Short narrow windows (landscape phones): the figure stays pinned on the
+   left and the step's words sit beside it on the right, scrolling on their
+   own when long, so the lights stay in view while the reader reads. */
+@media (max-width: 1059px) and (max-height: 600px) {
+  .dp-stage {
+    height: calc(100svh - 60px);
+  }
+  .dp-view {
+    top: calc(var(--rail-b, 52px) + 8px);
+    right: auto;
+    width: 56%;
+    height: calc(100svh - 60px - var(--rail-b, 52px) - 8px);
+  }
+  .dp-view::after {
+    display: none;
+  }
+  .dp-moon {
+    display: none;
+  }
+  .dp-words-col {
+    display: flex;
+    top: calc(var(--rail-b, 52px) + 8px);
+    bottom: 8px;
+    right: 12px;
+    width: 41%;
+    align-items: flex-start;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    padding-right: 6px;
+  }
+  .dp-words-col::before {
+    display: none;
+  }
+  .dp-title {
+    font-size: 20px;
+    margin: 4px 0 8px;
+  }
+  .dp-text.twotone,
+  .dp-story.twotone {
+    font-size: 14px;
+  }
+  .dp-rule {
+    margin-top: 12px;
+    font-size: 13px;
+  }
+  .dp-card {
+    display: none;
+  }
+  .dp-marker {
+    padding-top: 0;
+  }
+}
+@media (forced-colors: active) {
+  .dp-tag-body,
+  .dp-ctl {
+    forced-color-adjust: none;
+    background: Canvas;
+    color: CanvasText;
+    text-shadow: none;
+  }
+  .dp-ctl {
+    border: 1px solid CanvasText;
+  }
+  .dp-tag-body *,
+  .dp-ctl * {
+    color: inherit !important;
+  }
+  .dp-tag::before,
+  .dp-tag::after {
+    forced-color-adjust: none;
+    background: CanvasText;
+    box-shadow: 0 0 0 1px Canvas;
+  }
+  .dp-ctl.light[aria-pressed="false"],
+  .dp-ctl.gate {
+    color: CanvasText;
+    border-color: CanvasText;
+  }
+  .dp-ctl[aria-pressed="true"][class] {
+    border: 3px solid Highlight;
+    box-shadow: none;
+  }
+  .dp-chip[aria-checked="true"] {
+    forced-color-adjust: none;
+    background: Highlight;
+    color: HighlightText;
+    border-color: Highlight;
+  }
+  .dp-chip:focus-visible,
+  .dp-ctl:focus-visible,
+  .dp-act:focus-visible {
+    outline-color: CanvasText;
+  }
+}
+
+/* The light part: the same flat, by day. */
+.bay-block {
+  margin-top: clamp(48px, 8svh, 80px);
+}
+.bay-label {
+  margin: 0;
+}
+.bay-heading {
+  margin: 8px 0 16px;
+  font-size: clamp(26px, 2.4vw, 34px);
+  font-weight: 700;
+  color: var(--ink);
+}
+.bay-figure {
+  max-width: 1240px;
+  margin-top: 8px;
+}
+.bay-figure svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.bay-note {
+  max-width: 1240px;
+  margin: 12px 0 0;
+  color: var(--ink-grey);
+  line-height: 1.5;
+  text-wrap: balance;
+}
+.bay-cap {
+  fill: var(--ink-grey);
+  font-family: var(--sans);
+}
+.bay-cap-1 {
+  fill: var(--ink);
+  font-weight: 600;
+}
+.bay-arrow {
+  fill: none;
+  stroke: #2f5d9a;
+  stroke-width: 6;
+}
+.bay-arrow.opt {
+  stroke-dasharray: 18 14;
+}
+.bay-arrow-t {
+  fill: #2f5d9a;
+  font-family: var(--sans);
+  font-weight: 600;
+}
+.bay-arrow-t.bay-mono {
+  font-family: var(--mono);
+  font-weight: 500;
+}
+.bay-rail {
+  fill: none;
+  stroke: #5d6f92;
+  stroke-width: 6;
+}
+.bay-rail-t {
+  fill: #4c5a76;
+  font-family: var(--sans);
+  font-weight: 600;
+}
+.dp-compare {
+  display: grid;
+  margin: 6px 0 4px;
+  font-size: 15px;
+}
+.dp-crow {
+  display: grid;
+  grid-template-columns: 1.1fr 1.5fr 1.5fr;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid #e3e5ec;
+  color: var(--ink-grey);
+  line-height: 1.4;
+}
+.dp-crow [role="rowheader"],
+.dp-chead span {
+  color: var(--ink);
+  font-weight: 600;
+}
+.dp-chead {
+  border-top: 0;
+}
+.fcard p.dp-compare-cite {
+  margin: 6px 0 0;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--ink-grey);
+}
+@media (max-width: 760px) {
+  .dp-crow {
+    grid-template-columns: 1fr 1.3fr 1.3fr;
+    font-size: 14px;
+  }
+}

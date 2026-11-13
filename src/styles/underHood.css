@@ -1,0 +1,932 @@
+/* Chapter 6, under the hood: the chapter 1 laptop taken apart, one photograph. Amber is what
+   the firmware wrote (spans on the memory); white is what the OS does (threads, the tree of names).
+   The header, the caveat band and the pinned stage share one night, so they meet with no seam. */
+.chapter--under-the-hood {
+  --uh-night: #000;
+}
+.chapter--under-the-hood .chapter-intro {
+  color: #c9cde0;
+}
+.uh-caveat-band {
+  padding-top: clamp(40px, 7svh, 72px);
+  padding-bottom: var(--caveat-gap);
+  background: var(--canvas);
+}
+.uh-caveat-band .uh-caveat {
+  margin-top: 0;
+  padding-bottom: 8px;
+  color: #c9cde0;
+  text-wrap: balance;
+}
+
+/* The scene: the stage pins while one marker per stop crosses the viewport; then the dawn span. */
+.uh-scene {
+  position: relative;
+  height: calc(100svh - 60px + (var(--sum) + var(--dawn-h)) * 1svh);
+  background: var(--uh-night);
+}
+.uh-stage {
+  --dawn: 0;
+  position: sticky;
+  top: 60px;
+  height: calc(100svh - 60px);
+  overflow: hidden;
+  background: var(--uh-night) linear-gradient(180deg, var(--canvas) 0, #03050c 20%, var(--uh-night) 50%);
+}
+.uh-track {
+  position: absolute;
+  inset: 0 0 auto;
+  pointer-events: none;
+}
+.uh-marker {
+  height: calc(var(--h) * 1svh);
+}
+.uh-dawn-span {
+  height: calc(var(--dawn-h) * 1svh);
+}
+.uh-card {
+  display: none;
+}
+.uh-view {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+/* No seam with the header: the top of the picture starts as the header's own night. */
+.uh-view::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 110px;
+  background: linear-gradient(180deg, var(--canvas) 0, rgba(7, 11, 24, 0.55) 45%, transparent);
+  pointer-events: none;
+  opacity: calc(1 - var(--dawn) * 4);
+}
+
+/* The world is the plate at its own size. The camera moves between framings of the one photograph. */
+.uh-world {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 2400px;
+  height: 1500px;
+  transform-origin: 0 0;
+  transition: transform 0.9s cubic-bezier(0.45, 0, 0.2, 1);
+}
+.uh-world img {
+  position: absolute;
+  max-width: none;
+}
+/* The photograph has no edge: it fades into the stage's own night at its top, bottom and left, so no rectangle
+   shows on a wide window. The night photograph leaves as the dawn one arrives, so its black never frames it. */
+.uh-plate {
+  left: 0;
+  top: 0;
+  width: 2400px;
+  height: 1500px;
+  opacity: calc(1 - var(--dawn) * 4);
+  -webkit-mask-image:
+    linear-gradient(180deg, transparent 0, #000 3%, #000 94%, transparent 100%),
+    linear-gradient(90deg, transparent 0, #000 5%, #000 100%);
+  mask-image:
+    linear-gradient(180deg, transparent 0, #000 3%, #000 94%, transparent 100%),
+    linear-gradient(90deg, transparent 0, #000 5%, #000 100%);
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+}
+.uh-plate.uh-dawn {
+  opacity: calc(var(--dawn) * 4);
+  -webkit-mask-image:
+    linear-gradient(180deg, transparent 0, #000 3%, #000 94%, transparent 100%),
+    linear-gradient(90deg, transparent 0, #000 6%, #000 92%, transparent 100%);
+  mask-image:
+    linear-gradient(180deg, transparent 0, #000 3%, #000 94%, transparent 100%),
+    linear-gradient(90deg, transparent 0, #000 6%, #000 92%, transparent 100%);
+}
+/* The plate gives way to black before the words, whatever the framing. */
+.uh-shade {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0) var(--edge0, 60%), #000 var(--edge1, 80%));
+  opacity: calc(1 - var(--dawn) * 5);
+}
+
+/* Everything drawn on the photograph is one SVG in the plate's own pixels. --k is 1 / scale, so text and
+   hairlines keep their size on screen whatever the framing. */
+.uh-ov {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 2400px;
+  height: 1500px;
+  overflow: visible;
+  opacity: calc(1 - var(--dawn) * 5);
+}
+.uh-ov text {
+  font-size: calc(13px * var(--k, 2));
+  paint-order: stroke;
+  stroke: rgba(0, 0, 0, 0.9);
+  stroke-width: calc(3.5px * var(--k, 2));
+  stroke-linejoin: round;
+  font-family: var(--mono);
+  font-weight: 500;
+}
+/* What the firmware wrote: amber, in memory from the first screen on, dim until the OS has reached it. */
+.uh-span {
+  fill: #ffb84a;
+  opacity: 0.22;
+  mix-blend-mode: screen;
+  transition:
+    opacity 0.6s ease,
+    filter 0.6s ease;
+}
+.uh-span.on {
+  opacity: 1;
+  filter: drop-shadow(0 0 calc(4px * var(--k, 2)) rgba(255, 170, 50, 0.95))
+    drop-shadow(0 0 calc(12px * var(--k, 2)) rgba(242, 150, 40, 0.55));
+}
+.uh-span.ghost {
+  opacity: 0.1;
+}
+.uh-edge {
+  fill: none;
+  stroke: #fff;
+  stroke-width: calc(1px * var(--k, 2));
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+.uh-edge.on {
+  opacity: 0.8;
+}
+.uh-slot {
+  stroke: #000;
+  stroke-width: calc(1.5px * var(--k, 2));
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.uh-slot.on {
+  opacity: 0.75;
+}
+/* The FACS is written by both sides: an amber span with a white core once the OS has reached it. */
+.uh-core {
+  fill: #fff;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+.uh-core.on {
+  opacity: 0.9;
+}
+/* What the OS does: white. A thread is an address followed; it draws itself once, then falls back to an ember. */
+.uh-thr {
+  fill: none;
+  stroke: #eef3ff;
+  stroke-width: calc(1.3px * var(--k, 2));
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  opacity: 0;
+  transition:
+    stroke-dashoffset 0.9s ease,
+    opacity 0.3s ease;
+  filter: drop-shadow(0 0 calc(3px * var(--k, 2)) rgba(180, 205, 255, 0.8));
+}
+.uh-thr.on {
+  stroke-dashoffset: 0;
+  opacity: 0.95;
+}
+.uh-thr.d2.on {
+  transition-delay: 0.35s;
+}
+.uh-thr.d3.on {
+  transition-delay: 0.7s;
+}
+.uh-thr.faint {
+  stroke-dashoffset: 0;
+  opacity: 0.22;
+  filter: none;
+}
+.uh-thr.on.old {
+  opacity: 0.42;
+  filter: none;
+  transition-delay: 0s;
+}
+.uh-dot {
+  fill: #fff;
+  stroke: rgba(0, 0, 0, 0.9);
+  stroke-width: calc(3px * var(--k, 2));
+  paint-order: stroke;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.uh-dot.on {
+  opacity: 1;
+}
+.uh-sig {
+  fill: #fff;
+  opacity: 0;
+  transition: opacity 0.5s ease 0.2s;
+}
+.uh-sig.on {
+  opacity: 1;
+}
+.uh-sig.ghost {
+  opacity: 0.4;
+  fill: #c9cde0;
+}
+.uh-name {
+  fill: #fff;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.uh-name.sub {
+  fill: #c9cde0;
+}
+.uh-name.on {
+  opacity: 1;
+  transition-delay: 0.5s;
+}
+.uh-name.hot {
+  filter: drop-shadow(0 0 calc(5px * var(--k, 2)) #fff);
+}
+.uh-sig.on.old,
+.uh-name.on.old {
+  opacity: 0.42;
+}
+/* Stop 4: the source a person wrote (cream, as ink) faces the bytes it became (amber: they are the firmware's). */
+.uh-asl {
+  fill: var(--step-cream);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.uh-byte {
+  fill: #ffc46b;
+  opacity: 0;
+  transition: opacity 0.5s ease 0.3s;
+}
+.uh-byte .dim {
+  fill: #a88a5c;
+}
+.uh-rowline {
+  fill: none;
+  stroke: rgba(255, 184, 74, 0.6);
+  stroke-width: calc(1px * var(--k, 2));
+  opacity: 0;
+  transition: opacity 0.5s ease 0.15s;
+}
+.uh-strip.on .uh-asl,
+.uh-strip.on .uh-byte,
+.uh-strip.on .uh-rowline {
+  opacity: 1;
+}
+/* While the camera moves, what is drawn on the plate waits, then comes back at its right size. */
+.uh-ov.moving text,
+.uh-ov.moving .uh-thr,
+.uh-ov.moving .uh-edge,
+.uh-ov.moving .uh-slot,
+.uh-ov.moving .uh-dot,
+.uh-ov.moving .uh-rowline {
+  opacity: 0 !important;
+  transition: none !important;
+}
+/* The threads this stop adds wait undrawn, so they draw themselves once the camera has arrived. */
+.uh-ov.moving .uh-thr.on:not(.old) {
+  stroke-dashoffset: 1 !important;
+}
+/* Stop 7: the part powers up. The photographed status light on the SSD, over a quiet drawn glow. */
+.uh-glow {
+  position: absolute;
+  left: 560px;
+  top: 520px;
+  width: 330px;
+  height: 190px;
+  border-radius: 50%;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  opacity: 0;
+  transition: opacity 0.7s ease 0.5s;
+  background: radial-gradient(closest-side, rgba(225, 236, 255, 0.42), rgba(170, 200, 255, 0.16) 55%, transparent);
+}
+.uh-led {
+  opacity: 0;
+  transition: opacity 0.5s ease 0.5s;
+  -webkit-mask-image: radial-gradient(closest-side, #000 55%, transparent);
+  mask-image: radial-gradient(closest-side, #000 55%, transparent);
+}
+.uh-glow.on,
+.uh-led.on {
+  opacity: calc(1 - var(--dawn) * 5);
+}
+
+/* Your turn: the names on the machine are the buttons. */
+.uh-labels {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  pointer-events: none;
+  opacity: calc(1 - var(--dawn) * 4);
+}
+.uh-lb {
+  position: absolute;
+  pointer-events: auto;
+  cursor: pointer;
+  white-space: nowrap;
+  font: 500 13px var(--mono);
+  color: var(--text);
+  background: rgba(2, 2, 6, 0.35);
+  border: 0;
+  min-height: 34px;
+  padding: 4px 12px;
+  margin: -17px 0 0 -8px;
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1px rgba(237, 230, 211, 0.45);
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.95),
+    0 0 12px rgba(0, 0, 0, 0.9);
+  animation: uh-in 0.5s ease both;
+}
+.uh-lb:hover {
+  box-shadow: inset 0 0 0 1px var(--step-cream);
+}
+.uh-lb.done {
+  box-shadow: inset 0 0 0 1.5px var(--step-cream);
+  background: rgba(237, 230, 211, 0.16);
+}
+.uh-lb.part {
+  background: none;
+  box-shadow: inset 0 0 0 1px rgba(237, 230, 211, 0.22);
+  margin: 0;
+  padding: 0;
+  border-radius: 10px;
+}
+.uh-lb.part:hover {
+  box-shadow: inset 0 0 0 1px rgba(237, 230, 211, 0.5);
+}
+/* A press repaints in place; it does not fade in again. */
+.uh-labels.held .uh-lb {
+  animation: none;
+}
+@keyframes uh-in {
+  from {
+    opacity: 0;
+  }
+}
+.uh-btns {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  pointer-events: none;
+}
+.uh-btns .uh-lb {
+  position: static;
+  margin: 0;
+  min-height: 44px;
+}
+.uh-chip:focus-visible,
+.uh-lb:focus-visible,
+.uh-again:focus-visible {
+  outline: 2px solid #9db7e8;
+  outline-offset: 3px;
+}
+.uh-words:focus {
+  outline: none;
+}
+
+.uh-rail {
+  position: absolute;
+  z-index: 3;
+  top: 12px;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 12px;
+  opacity: calc(1 - var(--dawn) * 4);
+}
+.uh-chip {
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid #737c97;
+  background: rgba(4, 6, 16, 0.45);
+  color: #c9cde0;
+  font: 600 14px var(--sans);
+  cursor: pointer;
+}
+.uh-chip-n {
+  opacity: 0.7;
+  margin-right: 2px;
+}
+.uh-chip[aria-checked="true"] {
+  background: var(--step-cream);
+  border-color: var(--step-cream);
+  color: #101425;
+}
+.uh-chip[aria-checked="true"] .uh-chip-n {
+  opacity: 1;
+}
+.uh-chip-play {
+  border-color: var(--glow);
+}
+
+/* The words: in the plate's black right, the shared step-text values. No panel behind them. */
+.uh-words {
+  position: absolute;
+  z-index: 2;
+  top: 54%;
+  transform: translateY(-46%);
+  opacity: calc(1 - var(--dawn) * 4);
+}
+.uh-pos {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--board-muted);
+}
+.uh-title {
+  margin: var(--step-title-gap);
+  font: var(--step-title);
+  letter-spacing: -0.01em;
+}
+.uh-text.twotone {
+  margin: 0;
+  max-width: none;
+  font: var(--step-text);
+  color: var(--board-muted);
+}
+.uh-rule {
+  position: relative;
+  margin: var(--step-rule-gap) 0 0;
+  padding-top: var(--step-rule-pad);
+  font-size: var(--step-rule);
+  line-height: 1.5;
+  color: #d6d9e6;
+}
+.uh-rule::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 36px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--step-cream);
+  opacity: 0.8;
+}
+.uh-rule b {
+  color: var(--step-cream);
+  font-weight: 600;
+}
+.uh-hint {
+  margin: 12px 0 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--board-muted);
+}
+/* Stop 4's three pairs in words: read by screen readers on wide screens (the figure shows them), shown on narrow ones. */
+.uh-pairs {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  list-style: none;
+}
+.uh-verdict.twotone {
+  margin: 18px 0 0;
+  max-width: none;
+  font-size: clamp(18px, 1.5vw, 22px);
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--board-muted);
+}
+.uh-acts {
+  margin-top: 10px;
+}
+.uh-again {
+  min-height: 44px;
+  padding: 8px 0;
+  border: 0;
+  background: none;
+  color: var(--board-muted);
+  font: 600 13px var(--sans);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+/* The ending: the same frame at dawn, scrubbed by scroll; then the light page. --dawn runs 0 to 1.
+   Beyond the photograph's edges the dawn goes on in its own tones (sampled down its left and right edges),
+   at the plate's own heights. */
+.uh-fill {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: calc(var(--dawn) * 4);
+  background: linear-gradient(
+    180deg,
+    #f4f4f7 var(--py, 0px),
+    #dadce8 calc(var(--py, 0px) + var(--ph, 100%) * 0.08),
+    #c7cbde calc(var(--py, 0px) + var(--ph, 100%) * 0.25),
+    #b0b9d2 calc(var(--py, 0px) + var(--ph, 100%) * 0.5),
+    #a0adca calc(var(--py, 0px) + var(--ph, 100%) * 0.75),
+    #909fc2 calc(var(--py, 0px) + var(--ph, 100%) * 0.97)
+  );
+}
+.uh-paper {
+  position: absolute;
+  inset: 0;
+  background: var(--light);
+  opacity: calc((var(--dawn) - 0.6) * 2.5);
+  pointer-events: none;
+}
+.uh-dawn-band {
+  display: none;
+}
+.chapter--under-the-hood .chapter-dawn {
+  background: linear-gradient(180deg, var(--uh-night) 0%, #1b2350 25%, #8fa6d6 58%, #e8c9b4 80%, var(--light) 100%);
+}
+
+/* The light part: the same machine by day, as a line drawing with the tables and names in ink. */
+.uh-day {
+  margin-top: clamp(48px, 8svh, 80px);
+}
+.uh-drawing {
+  margin: 28px 0 0;
+}
+.uh-drawing-box {
+  position: relative;
+  width: min(100%, calc(78vh * 1700 / 1500));
+  aspect-ratio: 1700 / 1500;
+  margin: 0 auto;
+}
+/* The drawing's paper is pure white and is multiplied with the page, so it takes the page's own colour: one white, not two. */
+.uh-drawing-plate {
+  position: absolute;
+  inset: 0;
+  clip-path: inset(3px);
+  background: left top / calc(2400 / 1700 * 100%) auto no-repeat;
+  mix-blend-mode: multiply;
+}
+.uh-draw-ov {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.uh-draw-ov text {
+  font: 500 27px var(--mono);
+  fill: var(--ink);
+  paint-order: stroke;
+  stroke: var(--light);
+  stroke-width: 7px;
+  stroke-linejoin: round;
+}
+.uh-draw-ov .d-span {
+  fill: #2f5d9a;
+  opacity: 0.9;
+}
+.uh-draw-ov .d-sig {
+  fill: #2f5d9a;
+}
+.uh-draw-ov .d-thr {
+  fill: none;
+  stroke: #2f5d9a;
+  stroke-width: 2.5px;
+  opacity: 0.75;
+}
+.uh-draw-ov .d-twig {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 2.5px;
+  opacity: 0.8;
+}
+.uh-draw-ov .d-dot {
+  fill: var(--ink);
+  stroke: var(--light);
+  stroke-width: 4px;
+}
+.uh-drawing figcaption {
+  margin-top: 10px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--ink-grey);
+  text-align: center;
+  text-wrap: balance;
+}
+.uh-table td,
+.uh-table tbody th {
+  vertical-align: top;
+}
+.uh-table td {
+  color: var(--ink-grey);
+  line-height: 1.45;
+}
+.uh-table tbody th {
+  width: 14%;
+  white-space: nowrap;
+}
+.uh-table td:nth-child(2) {
+  width: 24%;
+}
+.uh-compare {
+  display: grid;
+  margin: 6px 0 4px;
+  font-size: 15px;
+}
+.uh-crow {
+  display: grid;
+  grid-template-columns: 0.9fr 1.5fr 1.5fr;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid #e3e5ec;
+  color: var(--ink-grey);
+  line-height: 1.4;
+}
+.uh-crow [role="rowheader"],
+.uh-chead span {
+  color: var(--ink);
+  font-weight: 600;
+}
+.uh-chead {
+  border-top: 0;
+}
+.fcard p.uh-compare-cite {
+  margin: 6px 0 0;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--ink-grey);
+}
+
+/* ?static and reduced motion: no pinning, no motion; the rail chooses the stop, each shown at rest. */
+.still .uh-scene {
+  height: auto;
+}
+.still .uh-stage {
+  position: relative;
+  top: auto;
+  height: calc(100svh - 60px);
+  min-height: 640px;
+}
+.still .uh-track,
+.still .uh-plate.uh-dawn,
+.still .uh-fill,
+.still .uh-paper {
+  display: none;
+}
+.still .uh-world,
+.still .uh-ov *,
+.still .uh-glow,
+.still .uh-led {
+  transition: none !important;
+}
+.still .uh-lb {
+  animation: none;
+}
+.still .uh-dawn-band {
+  display: block;
+}
+
+/* Narrow (below 1060 px, as NARROW in src/model/layout.ts): the figure pinned on top; each stop's words scroll past
+   beneath it in a card. */
+@media (max-width: 1059px) {
+  .uh-scene {
+    --fig: 46svh;
+    height: calc(2 * (56px + var(--fig)) + var(--sum) * 1svh + 65svh);
+  }
+  .uh-stage {
+    z-index: 3;
+    height: calc(56px + var(--fig));
+    background: linear-gradient(180deg, var(--canvas) 56px, var(--uh-night) 56px);
+    box-shadow:
+      0 -60px 0 0 var(--canvas),
+      0 18px 24px -6px var(--uh-night);
+  }
+  .uh-view {
+    inset: 56px 0 0 0;
+  }
+  .uh-view::after {
+    height: 44px;
+  }
+  .uh-shade,
+  .uh-fill,
+  .uh-paper,
+  .uh-plate.uh-dawn,
+  .uh-dawn-span {
+    display: none;
+  }
+  .uh-dawn-band {
+    display: block;
+  }
+  .uh-rail {
+    top: 4px;
+    padding-block: 6px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    justify-content: flex-start;
+    scrollbar-width: none;
+  }
+  .uh-rail::-webkit-scrollbar {
+    display: none;
+  }
+  .uh-chip {
+    flex: none;
+    white-space: nowrap;
+  }
+  .uh-words {
+    display: none;
+  }
+  .uh-track {
+    z-index: 2;
+  }
+  .uh-marker {
+    padding-top: calc(56px + var(--fig) + 18px);
+  }
+  /* Each card holds just under the figure while its stop scrolls, then leaves with its marker. */
+  .uh-card {
+    display: block;
+    position: sticky;
+    top: calc(60px + 56px + var(--fig) + 18px);
+    width: min(640px, 100%);
+    margin: 0 auto;
+    padding: 0 20px;
+    pointer-events: auto;
+    opacity: 0.45;
+    transition: opacity 0.3s ease;
+  }
+  .uh-marker.turn {
+    height: calc(56px + var(--fig) + 110svh);
+  }
+  .uh-card :is(a, button) {
+    scroll-margin-top: calc(56px + var(--fig) + 24px);
+  }
+  .uh-marker.on .uh-card {
+    opacity: 1;
+  }
+  .uh-title {
+    font-size: 24px;
+    margin: 6px 0 10px;
+  }
+  .uh-text.twotone {
+    font-size: 16px;
+  }
+  .uh-rule {
+    margin-top: 18px;
+    padding-top: 12px;
+    font-size: 15px;
+    line-height: 1.45;
+  }
+  .uh-verdict.twotone {
+    font-size: 17px;
+  }
+  .uh-ov text {
+    font-size: calc(12px * var(--k, 2));
+  }
+  /* The figure is small here: only what the current stop adds is named on it. The tables' letters leave once the
+     tree grows, the unknown table has none, the three methods are named in the words (the one that runs is shown),
+     and the bytes of stop 4 are listed in the card. */
+  .uh-sig.on.old,
+  .uh-sig.ghost,
+  .uh-name.n-sta,
+  .uh-name.n-off,
+  .uh-name.n-ctsub,
+  .uh-name.n-on:not(.hot),
+  .uh-strip {
+    display: none;
+  }
+  .uh-pairs {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip-path: none;
+    white-space: normal;
+    display: grid;
+    gap: 6px;
+    margin: 14px 0 0;
+    font-size: 13px;
+  }
+  .uh-pairs li {
+    display: grid;
+    grid-template-columns: 9.5em 1fr;
+    gap: 10px;
+  }
+  .uh-pairs code {
+    color: var(--step-cream);
+  }
+  .uh-pairs code.b {
+    color: #ffc46b;
+  }
+  .uh-lb {
+    font-size: 12px;
+  }
+  .still .uh-stage {
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+  }
+  .still .uh-view {
+    position: relative;
+    inset: auto;
+    height: var(--fig, 46svh);
+    margin-top: 56px;
+  }
+  .still .uh-words {
+    display: block;
+    position: static;
+    transform: none;
+    padding: 20px 20px 28px;
+  }
+  .uh-table {
+    font-size: 15px;
+  }
+  .uh-table tbody th {
+    width: 22%;
+    white-space: normal;
+  }
+}
+/* Short narrow windows: the figure gives way so at least 45 percent of the height stays free for the words,
+   and the cards scroll freely instead of holding half hidden. */
+@media (max-width: 1059px) and (max-height: 740px) {
+  .uh-scene {
+    --fig: max(72px, min(40svh, calc(55svh - 116px)));
+  }
+  .uh-card {
+    position: static;
+  }
+}
+@media (max-width: 480px) and (min-height: 741px) {
+  .uh-scene {
+    --fig: 42svh;
+  }
+}
+@media (max-width: 480px) {
+  .uh-chip {
+    min-height: 32px;
+    padding: 0 9px;
+    font-size: 13px;
+  }
+  .uh-chip:not([aria-checked="true"]) .uh-chip-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+@media (max-width: 760px) {
+  .uh-crow {
+    grid-template-columns: 1fr 1.3fr 1.3fr;
+    font-size: 14px;
+  }
+}
+/* A wide but short window: the words keep to the stage and scroll inside it rather than being cut off. */
+@media (min-width: 1060px) and (max-height: 600px) {
+  .uh-words {
+    top: 56px;
+    bottom: 8px;
+    transform: none;
+    overflow-y: auto;
+    padding-right: 6px;
+  }
+}
+@media (forced-colors: active) {
+  /* The picture keeps its own colours, and so does what is drawn on it. */
+  .uh-world {
+    forced-color-adjust: none;
+  }
+  .uh-lb {
+    forced-color-adjust: none;
+    background: Canvas;
+    color: CanvasText;
+    text-shadow: none;
+    border: 1px solid CanvasText;
+    box-shadow: none;
+  }
+  .uh-lb.done {
+    border: 3px solid Highlight;
+  }
+  .uh-chip[aria-checked="true"] {
+    forced-color-adjust: none;
+    background: Highlight;
+    color: HighlightText;
+    border-color: Highlight;
+  }
+  .uh-chip:focus-visible,
+  .uh-lb:focus-visible,
+  .uh-again:focus-visible {
+    outline-color: CanvasText;
+  }
+}

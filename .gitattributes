@@ -1,0 +1,4 @@
+# One line ending everywhere, so the formatting check gives the same answer on every system.
+* text=auto eol=lf
+*.webp binary
+*.png binary

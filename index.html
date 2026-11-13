@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Nox: what your laptop does after dark</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <meta
+      name="description"
+      content="An interactive explainer of ACPI power management: how a PC sleeps and wakes, from public specifications."
+    />
+    <link rel="canonical" href="https://lejie710.github.io/nox/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://lejie710.github.io/nox/" />
+    <meta property="og:title" content="Nox: what your laptop does after dark" />
+    <meta
+      property="og:description"
+      content="An interactive explainer of ACPI power management: how a PC sleeps and wakes, from public specifications."
+    />
+    <meta property="og:image" content="https://lejie710.github.io/nox/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="628" />
+    <meta
+      property="og:image:alt"
+      content="Nox. After dark. What your laptop does while you sleep. A closed laptop at night under a crescent moon."
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <script>
+      // Motion gate, decided before first paint. Static when ?static is in the
+      // URL, when the reader prefers reduced motion, or when the browser lacks
+      // scroll-driven animations. The static page shows each scene's end state.
+      (function () {
+        var p = new URLSearchParams(location.search);
+        var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        var supports = window.CSS && CSS.supports("animation-timeline: view()");
+        document.documentElement.classList.add(!p.has("static") && !reduce && supports ? "enhanced" : "static");
+        // Chapters need no scroll-driven animations, only the reader's consent
+        // to motion: they go still only for ?static or reduced motion.
+        if (p.has("static") || reduce) document.documentElement.classList.add("still");
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

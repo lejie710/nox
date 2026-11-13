@@ -1,0 +1,1313 @@
+/* Chapter 4, CPU power: the night bench, then the same bench by day.
+   The header, the caveat band and the pinned stage share one navy, so they meet
+   with no seam; the plate is the whole stage. --day crosses the dawn span,
+   --exit fades the scene into the light part at its end. */
+.chapter--cpu-power {
+  --cp-sky: #05091c;
+  --cp-mat: #ced3db;
+  --cp-move: 0.9s;
+  --cp-ease: cubic-bezier(0.45, 0, 0.2, 1);
+}
+.chapter--cpu-power .chapter-head {
+  position: relative;
+  isolation: isolate;
+  background: var(--cp-sky);
+}
+.chapter--cpu-power .chapter-head::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(180deg, var(--canvas) 0, transparent 220px);
+}
+.chapter--cpu-power .chapter-intro {
+  color: #c9cde0;
+}
+.cp-caveat-band {
+  padding-top: clamp(40px, 7svh, 72px);
+  padding-bottom: var(--caveat-gap);
+  background: var(--cp-sky);
+}
+.cp-caveat-band .cp-caveat {
+  margin-top: 0;
+  padding-bottom: 8px;
+  color: #c9cde0;
+  text-wrap: balance;
+}
+
+/* Nine night markers, the dawn span, twelve day markers, room for the exit. */
+.cp-scene {
+  position: relative;
+  height: calc(100svh - 60px + 9 * 85svh + 85svh + 12 * 60svh + 60svh);
+  background: var(--cp-sky);
+}
+.cp-stage {
+  position: sticky;
+  top: 60px;
+  height: calc(100svh - 60px);
+  overflow: hidden;
+  background: var(--cp-sky);
+}
+.cp-track {
+  position: absolute;
+  inset: 0 0 auto;
+  pointer-events: none;
+}
+.cp-marker {
+  height: 85svh;
+}
+.cp-marker.day {
+  height: 60svh;
+}
+.cp-dawn-span {
+  height: 85svh;
+}
+.cp-card {
+  display: none;
+}
+.cp-view {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: var(--cp-sky);
+  transition: background-color 0.6s ease;
+}
+/* By day the world beyond the plate is the mat colour, so frames near its edge show no seam. */
+.cp-stage.day .cp-view {
+  background: var(--cp-mat);
+}
+.cp-world {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 2400px;
+  height: 1500px;
+  transform-origin: 0 0;
+  transition: transform var(--cp-move) var(--cp-ease);
+  will-change: transform;
+}
+.cp-plate {
+  position: absolute;
+  inset: 0;
+  width: 2400px;
+  height: 1500px;
+  max-width: none;
+  z-index: 0;
+}
+.cp-plate:not(.cp-plate-day) {
+  opacity: calc(1 - var(--day, 0));
+}
+/* The day photograph runs on beyond its own edges (4800 x 3900, the plate at its middle), so no boundary shows at any framing. */
+.cp-plate-day {
+  left: -1200px;
+  top: -1200px;
+  width: 4800px;
+  height: 3900px;
+  max-width: none;
+  opacity: var(--day, 0);
+}
+/* The room's light follows the power the cores draw, and goes with the night. */
+.cp-ambient {
+  position: absolute;
+  left: 140px;
+  top: 60px;
+  width: 1500px;
+  height: 1300px;
+  z-index: 1;
+  background: radial-gradient(closest-side, rgba(170, 196, 255, 0.34), rgba(120, 150, 230, 0.12) 55%, transparent);
+  opacity: calc(var(--amb, 0.4) * (1 - var(--day, 0)));
+  transition: opacity 0.8s ease;
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+.cp-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  overflow: visible;
+}
+.cp-night {
+  opacity: calc(1 - var(--day, 0));
+}
+.cp-sheets {
+  opacity: var(--day, 0);
+}
+.cp-sky-fade {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 120px;
+  background: linear-gradient(180deg, var(--cp-sky), transparent);
+  pointer-events: none;
+  opacity: calc(1 - var(--day, 0));
+}
+.cp-exit-fade {
+  position: absolute;
+  inset: 0;
+  background: var(--light);
+  opacity: calc(var(--exit, 0) * 2.5 - 1.5);
+  pointer-events: none;
+}
+.cp-stage.reflow .cp-world,
+.cp-stage.reflow .cp-tag,
+.cp-stage.reflow .cp-ladder {
+  transition: none;
+}
+.cp-strip {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 38%;
+  overflow: visible;
+  opacity: calc(1 - var(--day, 0));
+}
+.cp-stage.day .cp-strip {
+  display: none;
+}
+
+/* Tiles: light on the die means executing; never a heat colour. */
+.cp-tile-fill {
+  fill: #000;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.cp-tile-glow {
+  fill: url(#cp-run);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  filter: url(#cp-bloom);
+  mix-blend-mode: screen;
+}
+.cp-tile-edge {
+  fill: none;
+  stroke: #e8efff;
+  stroke-width: 3;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.cp-tile-kept {
+  fill: url(#cp-kept);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.cp-tile[data-s="run"] .cp-tile-glow {
+  opacity: 0.95;
+  animation: cp-shimmer 1.6s ease-in-out 3;
+}
+.cp-tile[data-s="run"] .cp-tile-edge {
+  opacity: 1;
+}
+@keyframes cp-shimmer {
+  50% {
+    opacity: 0.8;
+  }
+}
+.cp-tile[data-s="cg"] .cp-tile-edge,
+.cp-tile[data-s="c1"] .cp-tile-edge {
+  opacity: 0.55;
+}
+.cp-tile[data-s="cg"] .cp-tile-glow,
+.cp-tile[data-s="c1"] .cp-tile-glow {
+  opacity: 0.22;
+}
+.cp-tile[data-s="c2"] .cp-tile-edge {
+  opacity: 0.35;
+}
+.cp-tile[data-s="c2"] .cp-tile-glow {
+  opacity: 0.1;
+}
+.cp-tile[data-s="ret"] .cp-tile-fill,
+.cp-tile[data-s="c3"] .cp-tile-fill {
+  opacity: 0.35;
+}
+.cp-tile[data-s="ret"] .cp-tile-kept,
+.cp-tile[data-s="c3"] .cp-tile-kept {
+  opacity: 0.45;
+}
+.cp-tile[data-s="ret"] .cp-tile-edge,
+.cp-tile[data-s="c3"] .cp-tile-edge {
+  opacity: 0.18;
+}
+.cp-tile[data-s="pd"] .cp-tile-fill {
+  opacity: 0.62;
+}
+.cp-tile.neighbour[data-s="run"] .cp-tile-glow {
+  opacity: 0.45;
+  animation: none;
+}
+.cp-tile.neighbour[data-s="run"] .cp-tile-edge {
+  opacity: 0.35;
+}
+.cp-cluster {
+  fill: none;
+  stroke: #ede6d3;
+  stroke-width: 3;
+  stroke-dasharray: 16 12;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.cp-cluster.on {
+  opacity: 0.85;
+}
+.cp-cluster.on[data-rest="true"] {
+  opacity: 0.35;
+}
+.cp-bm {
+  fill: #ffffff;
+  opacity: 0;
+  filter: url(#cp-soft);
+}
+.cp-scale-axis {
+  stroke: #8790ad;
+  stroke-width: 4;
+}
+.cp-detent {
+  fill: #2a3048;
+  stroke: #b9c1da;
+  stroke-width: 3;
+}
+.cp-detent.blocked {
+  stroke-dasharray: 6 6;
+  opacity: 0.5;
+}
+.cp-ppc {
+  fill: var(--glow);
+}
+.cp-ptr {
+  fill: #ede6d3;
+  transition: transform 0.9s var(--cp-ease);
+}
+.cp-ptr.del {
+  fill: none;
+  stroke: #dce6ff;
+  stroke-width: 4;
+}
+.cp-gmark {
+  transition: transform 0.9s var(--cp-ease);
+}
+.cp-mark {
+  font: 600 calc(26px * var(--k, 1)) var(--sans);
+  fill: #c9cfe2;
+}
+.cp-mark.mono {
+  font: 500 calc(24px * var(--k, 1)) var(--mono);
+}
+.cp-tick {
+  stroke: #b9c1da;
+  stroke-width: 3;
+}
+
+/* The trace along the bench edge: power over time. */
+.cp-axis {
+  stroke: #59617c;
+  stroke-width: 3;
+}
+.cp-trace-base {
+  stroke: #2e3550;
+  stroke-width: 2;
+  stroke-dasharray: 4 10;
+}
+.cp-lane {
+  fill: none;
+  stroke: #e8efff;
+  stroke-width: 5;
+  stroke-linejoin: round;
+}
+.cp-lane.thin {
+  stroke-width: 3.5;
+}
+.cp-lane.cluster {
+  stroke: #ede6d3;
+}
+.cp-hatch {
+  fill: url(#cp-hatch);
+  opacity: 0.95;
+}
+.cp-est {
+  fill: none;
+  stroke: #c9cfe2;
+  stroke-width: 3;
+  stroke-dasharray: 10 9;
+}
+.cp-irq {
+  stroke: var(--glow);
+  stroke-width: 4;
+}
+.cp-irq-dot {
+  fill: var(--glow);
+}
+.cp-res {
+  stroke: #ede6d3;
+  stroke-width: 3;
+  stroke-dasharray: 3 7;
+}
+.cp-limit {
+  fill: none;
+  stroke: #ffd59a;
+  stroke-width: 3;
+  stroke-dasharray: 14 8;
+}
+.cp-late {
+  fill: none;
+  stroke: #ffd59a;
+  stroke-width: 4;
+}
+.cp-save {
+  fill: #6f9be0;
+  opacity: 0.42;
+}
+.cp-save.faint {
+  opacity: 0.16;
+}
+.cp-waste {
+  fill: #9aa0ad;
+  opacity: 0.55;
+}
+.cp-stria {
+  stroke: #dce6ff;
+  stroke-width: 2;
+  opacity: 0.8;
+}
+.cp-comb {
+  stroke: #8790ad;
+  stroke-width: 2;
+}
+.cp-lane-name {
+  font: 600 calc(24px * var(--k, 1)) var(--sans);
+  fill: #9aa2bb;
+}
+.cp-lane-name.mono {
+  font-family: var(--mono);
+  font-weight: 500;
+  fill: #c9cfe2;
+}
+.cp-reveal {
+  transform-box: fill-box;
+  transform-origin: 0 0;
+}
+.cp-reveal.go {
+  animation: cp-reveal 2.4s linear both;
+}
+@keyframes cp-reveal {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+.cp-strip .cp-lane {
+  stroke-width: 2.5px;
+  vector-effect: non-scaling-stroke;
+}
+.cp-strip .cp-est,
+.cp-strip .cp-limit,
+.cp-strip .cp-late,
+.cp-strip .cp-irq,
+.cp-strip .cp-res {
+  stroke-width: 2px;
+  vector-effect: non-scaling-stroke;
+}
+
+/* Labels on the figure (the shared standard): bare text with a soft shadow, no box, border or
+   backdrop; where a label names one part, a hairline (--lead, px) runs from the text to a dot on it. */
+.cp-tags {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: calc((1 - var(--exit, 0) * 2.5) * (1 - var(--day, 0)));
+}
+.cp-tag {
+  position: absolute;
+  display: inline-grid;
+  width: max-content;
+  max-width: 330px;
+  line-height: 1.2;
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.95),
+    0 0 5px rgba(0, 0, 0, 0.9),
+    0 0 12px rgba(0, 0, 0, 0.9),
+    0 0 26px rgba(0, 0, 0, 0.7);
+  transition:
+    left var(--cp-move) var(--cp-ease),
+    top var(--cp-move) var(--cp-ease);
+}
+.cp-tag.led::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: calc(100% + 2px);
+  width: 1px;
+  height: calc(var(--lead) - 2px);
+  background: rgba(237, 230, 211, 0.85);
+  box-shadow:
+    0 0 0 0.5px rgba(5, 9, 28, 0.8),
+    0 0 2px rgba(0, 0, 0, 0.7);
+}
+.cp-tag.led::after {
+  content: "";
+  position: absolute;
+  left: -2px;
+  top: calc(100% + var(--lead) - 2.5px);
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #ede6d3;
+  box-shadow: 0 0 0 1.5px rgba(5, 9, 28, 0.9);
+}
+.cp-tag.led.aboveRight {
+  text-align: right;
+}
+.cp-tag.led.aboveRight::before {
+  left: auto;
+  right: 0;
+}
+.cp-tag.led.aboveRight::after {
+  left: auto;
+  right: -2px;
+}
+.cp-tag.led.below::before {
+  top: auto;
+  bottom: calc(100% + 2px);
+}
+.cp-tag.led.below::after {
+  top: auto;
+  bottom: calc(100% + var(--lead) - 2.5px);
+}
+.cp-tag.led.mid {
+  padding-left: 5px;
+}
+.cp-tag.led.mid::before {
+  left: calc(-1 * var(--lead));
+  top: 50%;
+  width: var(--lead);
+  height: 1px;
+}
+.cp-tag.led.mid::after {
+  left: calc(-1 * var(--lead) - 2.5px);
+  top: calc(50% - 2.5px);
+}
+.cp-tag.above {
+  transform: translate(0, -100%);
+}
+.cp-tag.aboveRight {
+  transform: translate(-100%, -100%);
+}
+.cp-tag.below {
+  transform: translate(0, 0);
+}
+.cp-tag.belowRight {
+  transform: translate(-100%, 0);
+}
+.cp-tag.mid {
+  transform: translate(0, -50%);
+}
+.cp-tag-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+.cp-tag-state {
+  font-size: 13px;
+  color: #d5dae8;
+}
+.cp-tag-state b {
+  color: var(--text);
+  font-weight: 600;
+}
+.cp-tag[data-tone="run"] .cp-tag-state b {
+  color: #e8efff;
+}
+.cp-tag[data-tone="deep"] .cp-tag-state b {
+  color: #9fb2e0;
+}
+.cp-tag-note {
+  font-size: 12px;
+  color: #c3c8d8;
+}
+.cp-tag-note.warn {
+  color: #ffd59a;
+}
+
+.cp-moon {
+  position: absolute;
+  z-index: 2;
+  top: 64px;
+  right: clamp(16px, 4vw, 64px);
+  display: grid;
+  justify-items: end;
+  gap: 4px;
+  pointer-events: none;
+  opacity: calc(1 - var(--exit, 0) * 1.6);
+}
+.cp-stage:not(.day) .cp-moon {
+  background: rgba(5, 9, 28, calc(0.7 * var(--day, 0)));
+  border-radius: 12px;
+  padding: 4px 8px;
+}
+.cp-moon svg {
+  width: 64px;
+  height: 64px;
+}
+.cp-moon-word {
+  margin: 0;
+  font-size: 12px;
+  color: var(--board-muted);
+}
+.cp-stage.day .cp-moon-word {
+  color: #4d5466;
+}
+
+.cp-rail {
+  position: absolute;
+  z-index: 3;
+  top: 12px;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 12px;
+  opacity: calc(1 - var(--exit, 0) * 2.5);
+}
+.cp-chip {
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid #737c97;
+  background: rgba(5, 9, 28, 0.45);
+  color: #c9cde0;
+  font: 600 14px var(--sans);
+  cursor: pointer;
+}
+.cp-chip-n {
+  opacity: 0.7;
+  margin-right: 2px;
+}
+.cp-chip[aria-checked="true"] {
+  background: #ede6d3;
+  border-color: #ede6d3;
+  color: #101425;
+}
+.cp-chip[aria-checked="true"] .cp-chip-n {
+  opacity: 1;
+}
+.cp-chip-play {
+  border-color: var(--glow);
+}
+.cp-stage.day .cp-chip {
+  background: rgba(255, 255, 255, 0.6);
+  border-color: #9aa1b2;
+  color: #2a2e3a;
+}
+.cp-stage.day .cp-chip[aria-checked="true"] {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fff;
+}
+/* The nav bar follows the day: light over a light bench. */
+html:has(.cp-stage.day) .lnav {
+  background: rgba(244, 245, 248, 0.95);
+  color: var(--ink);
+}
+html:has(.cp-stage.day) .lnav .links [aria-current]::after {
+  background: #8a5200;
+}
+.cp-chip:focus-visible,
+.cp-act:focus-visible,
+.cp-ladder:focus-visible {
+  outline: 2px solid #9db7e8;
+  outline-offset: 3px;
+}
+.cp-stage.day .cp-chip:focus-visible,
+.cp-stage.day .cp-skip:focus-visible {
+  outline: 2px solid #2f5d9a;
+  outline-offset: 3px;
+}
+
+/* The words: the right side, a soft falloff behind them, no box. */
+/* The column starts under the rail, so the tallest step never runs beneath it. */
+.cp-words-col {
+  position: absolute;
+  z-index: 2;
+  right: clamp(20px, 4vw, 72px);
+  top: calc(var(--rail-b, 52px) + 4px);
+  bottom: 0;
+  width: min(430px, 31vw);
+  display: flex;
+  align-items: safe center;
+  pointer-events: none;
+  opacity: calc(1 - var(--exit, 0) * 2.5);
+}
+.cp-words-col::before {
+  content: "";
+  position: absolute;
+  inset: -10% -40% -10% -30%;
+  z-index: -1;
+  background: radial-gradient(
+    closest-side,
+    rgba(5, 9, 28, calc(0.82 + 0.1 * var(--day, 0))),
+    rgba(5, 9, 28, calc(0.55 + 0.35 * var(--day, 0))) 60%,
+    rgba(5, 9, 28, calc(0.75 * var(--day, 0)))
+  );
+}
+.cp-stage.day .cp-words-col::before {
+  background: radial-gradient(closest-side, rgba(238, 240, 245, 0.92), rgba(238, 240, 245, 0.7) 60%, transparent);
+}
+.cp-words {
+  pointer-events: auto;
+}
+.cp-pos {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--board-muted);
+}
+.cp-title {
+  margin: var(--step-title-gap);
+  font: var(--step-title);
+  letter-spacing: -0.01em;
+}
+.cp-text.twotone {
+  margin: 0;
+  max-width: none;
+  font: var(--step-text);
+  color: var(--board-muted);
+}
+.cp-rule {
+  position: relative;
+  margin: var(--step-rule-gap) 0 0;
+  padding-top: var(--step-rule-pad);
+  font-size: var(--step-rule);
+  line-height: 1.5;
+  color: #d6d9e6;
+}
+.cp-rule::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 36px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--step-cream);
+  opacity: 0.8;
+}
+.cp-rule b {
+  color: var(--step-cream);
+  font-weight: 600;
+}
+.cp-q {
+  margin: 16px 0 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #ede6d3;
+}
+.cp-story {
+  margin: 14px 0 0;
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--text);
+}
+.cp-hint {
+  margin: 12px 0 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--board-muted);
+}
+.cp-acts,
+.cp-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+.cp-act {
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid #dce6ff;
+  background: rgba(5, 9, 28, 0.5);
+  color: var(--text);
+  font: 600 14px var(--sans);
+  cursor: pointer;
+}
+.cp-act:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.cp-skip {
+  color: #9db7e8;
+  font-weight: 600;
+  display: inline-block;
+  padding: 12px 0;
+}
+.cp-stage.day .cp-title,
+.cp-stage.day .cp-text b {
+  color: var(--ink);
+}
+.cp-stage.day .cp-text,
+.cp-stage.day .cp-pos,
+.cp-stage.day .cp-hint {
+  color: #4d5466;
+}
+.cp-stage.day .cp-skip {
+  color: #2f5d9a;
+}
+
+/* Your turn: the depth ladder beside core 0. */
+.cp-controls {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  opacity: calc((1 - var(--exit, 0) * 2.5) * (1 - var(--day, 0)));
+}
+.cp-ladder {
+  position: absolute;
+  transform: translate(-100%, 0);
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid #dce6ff;
+  background: rgba(5, 9, 28, 0.78);
+  color: var(--text);
+  font: 600 13px var(--sans);
+  white-space: nowrap;
+  cursor: pointer;
+  pointer-events: auto;
+  transition:
+    left var(--cp-move) var(--cp-ease),
+    top var(--cp-move) var(--cp-ease);
+}
+.cp-ladder:hover {
+  background: #ede6d3;
+  color: #101425;
+}
+
+/* By day: ink on the bench itself. Two inks only: dark on the pale mat, cream on the dark chuck and die. */
+.cp-ink {
+  fill: none;
+  stroke: #1d1f27;
+  stroke-width: 4;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.cp-ink-thin {
+  fill: none;
+  stroke: #1d1f27;
+  stroke-width: 2.4;
+}
+.cp-ink-dash {
+  fill: none;
+  stroke: #1d1f27;
+  stroke-width: 3;
+  stroke-dasharray: 12 10;
+}
+.cp-ink-hatch {
+  fill: url(#cp-hatch-ink);
+}
+.cp-ink-area {
+  fill: rgba(29, 31, 39, 0.05);
+}
+.cp-ink-blue {
+  fill: none;
+  stroke: #2f5d9a;
+  stroke-width: 4;
+}
+.cp-ink-rust {
+  stroke: #8a5208;
+  stroke-width: 5;
+}
+.cp-ink-c {
+  fill: none;
+  stroke: #f4efe2;
+  stroke-width: 4;
+  filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.8));
+}
+.cp-ink-c.dash {
+  stroke-dasharray: 16 11;
+  stroke-width: 3.5;
+}
+.cp-ink-c.dot {
+  stroke-dasharray: 0.1 13;
+  stroke-width: 5;
+  stroke-linecap: round;
+}
+.cp-ink-t {
+  font: 500 28px var(--sans);
+  fill: #1d1f27;
+}
+.cp-ink-t .b,
+.cp-ink-t.b {
+  font-weight: 650;
+}
+.cp-ink-t.grey {
+  fill: #4d5466;
+}
+.cp-ink-t.mono {
+  font-family: var(--mono);
+  fill: #2f5d9a;
+}
+.cp-ink-t.rust {
+  fill: #8a5208;
+}
+.cp-ink-w {
+  font: 600 28px var(--sans);
+  fill: #f4efe2;
+  paint-order: stroke;
+  stroke: rgba(0, 0, 0, 0.85);
+  stroke-width: 7px;
+  stroke-linejoin: round;
+}
+/* Day ink never under 12 px: the frame's floor factors (1 on the overview). The secondary lines are 24 px. */
+.cp-pr .cp-ink-t {
+  font-size: calc(28px * var(--kp, 1));
+}
+.cp-pr .cp-ink-t.sub,
+.cp-pr .cp-ink-t.mono {
+  font-size: calc(24px * var(--kp, 1));
+}
+.cp-dr .cp-ink-t,
+.cp-dr .cp-ink-w {
+  font-size: calc(28px * var(--kd, 1));
+}
+.cp-dr .cp-ink-t.sub,
+.cp-dr .cp-ink-t.mono {
+  font-size: calc(24px * var(--kd, 1));
+}
+.cp-cd .cp-ink-t {
+  font-size: calc(28px * var(--kc, 1));
+}
+.cp-cd .cp-ink-t.sub,
+.cp-cd .cp-ink-t.mono {
+  font-size: calc(24px * var(--kc, 1));
+}
+.cp-part {
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.cp-part.on {
+  opacity: 1;
+}
+.cp-part .cp-draw {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset 0.9s ease;
+}
+.cp-part.on .cp-draw {
+  stroke-dashoffset: 0;
+}
+.cp-part .cp-row {
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+.cp-part.on .cp-row {
+  opacity: 1;
+}
+
+/* The light part after the scene. */
+.cp-compare {
+  display: grid;
+  margin: 6px 0 4px;
+  font-size: 15px;
+}
+.cp-crow {
+  display: grid;
+  grid-template-columns: 1fr 1.6fr 1.6fr;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid #e3e5ec;
+  color: var(--ink-grey);
+  line-height: 1.4;
+}
+.cp-crow .span2 {
+  grid-column: 2 / span 2;
+}
+.cp-crow [role="rowheader"],
+.cp-chead span {
+  color: var(--ink);
+  font-weight: 600;
+}
+.cp-chead {
+  border-top: 0;
+}
+.fcard p.cp-compare-cite {
+  margin: 6px 0 0;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--ink-grey);
+}
+.cp-light {
+  padding-top: clamp(48px, 8svh, 80px);
+}
+
+/* ?static and reduced motion: no pinning, no motion, the rail chooses the step. */
+.still .cp-scene {
+  height: auto;
+}
+.still .cp-stage {
+  position: relative;
+  top: auto;
+  height: calc(100svh - 60px);
+  min-height: 640px;
+}
+.still .cp-track {
+  display: none;
+}
+.still .cp-tile[data-s="run"] .cp-tile-glow {
+  animation: none;
+}
+.still .cp-part,
+.still .cp-part .cp-row,
+.still .cp-part .cp-draw,
+.still .cp-gmark,
+.still .cp-ptr {
+  transition: none !important;
+}
+
+/* The rail shows one group: hidden chips are not rendered (see Bench). */
+/* Narrow (below 1060 px, as NARROW in src/model/layout.ts): the figure is pinned on top;
+   each step's words scroll past beneath it in a card. */
+@media (max-width: 1059px) {
+  .cp-view {
+    top: calc(var(--rail-b, 52px) + 12px);
+    bottom: auto;
+    height: 56svh;
+  }
+  .cp-stage {
+    z-index: 3;
+    height: calc(var(--rail-b, 52px) + 12px + 56svh);
+    box-shadow: 0 -60px 0 0 var(--cp-sky);
+  }
+  .cp-stage.day {
+    box-shadow: 0 -60px 0 0 var(--cp-mat);
+    background: var(--cp-mat);
+  }
+  .cp-sky-fade {
+    height: 40px;
+  }
+  .cp-moon {
+    top: calc(var(--rail-b, 52px) + 20px);
+    right: 12px;
+  }
+  .cp-moon svg {
+    width: 44px;
+    height: 44px;
+  }
+  .cp-moon-word {
+    font-size: 11px;
+    max-width: 130px;
+    text-align: right;
+  }
+  .cp-words-col {
+    display: none;
+  }
+  .cp-tag {
+    max-width: 170px;
+  }
+  .cp-tag-name,
+  .cp-tag-state {
+    font-size: 12px;
+  }
+  .cp-tag-note {
+    display: none;
+  }
+  .cp-rail {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    justify-content: flex-start;
+    scrollbar-width: none;
+  }
+  .cp-chip {
+    flex: none;
+    white-space: nowrap;
+  }
+  /* The track is in the flow here, starting under the pinned figure, so the scene is as long as its cards. */
+  .cp-track {
+    z-index: 2;
+    position: relative;
+    margin-top: calc(-1 * (var(--rail-b, 52px) + 12px + 56svh));
+  }
+  .cp-marker,
+  .cp-marker.day {
+    height: 85svh;
+    padding-top: calc(var(--rail-b, 52px) + 24px + 56svh);
+  }
+  /* By day a stop holds two or three steps (DAY_STOPS): its card sets its height, and the steps without a stop of their own are out. */
+  .cp-marker.day {
+    height: auto;
+    min-height: 85svh;
+  }
+  .cp-marker.cp-nostop {
+    display: none;
+  }
+  .cp-stop-step + .cp-stop-step {
+    margin-top: 18px;
+  }
+  .cp-stage.day .cp-moon {
+    display: none;
+  }
+  .cp-card {
+    display: block;
+    width: min(640px, 92vw);
+    margin: 0 auto;
+    padding: 18px 18px 20px;
+    border-radius: 18px;
+    background: rgba(5, 9, 28, 0.92);
+    pointer-events: auto;
+  }
+  .cp-marker.day .cp-card {
+    background: rgba(250, 251, 253, 0.96);
+    color: var(--ink);
+  }
+  .cp-marker.day .cp-card .cp-text,
+  .cp-marker.day .cp-card .cp-pos,
+  .cp-marker.day .cp-card .cp-hint {
+    color: #4d5466;
+  }
+  .cp-marker.day .cp-card .cp-text b {
+    color: var(--ink);
+  }
+  .cp-marker.day .cp-card .cp-skip {
+    color: #2f5d9a;
+  }
+  .cp-scene {
+    height: auto;
+    padding-bottom: 60svh;
+  }
+  .still .cp-scene {
+    padding-bottom: 0;
+  }
+  .cp-sheets .sub {
+    display: none;
+  }
+  .still .cp-stage {
+    height: auto;
+    min-height: 0;
+  }
+  .still .cp-view {
+    position: relative;
+    top: auto;
+    margin-top: calc(var(--rail-b, 52px) + 12px);
+  }
+  .still .cp-words-col {
+    display: flex;
+    position: relative;
+    top: auto;
+    width: auto;
+    right: auto;
+    padding: 20px 20px 24px;
+  }
+  .still .cp-words-col::before {
+    display: none;
+  }
+  .still .cp-stage.day .cp-words-col {
+    background: #eef0f5;
+  }
+}
+@media (max-width: 480px) {
+  .cp-view {
+    height: 50svh;
+  }
+  .cp-stage {
+    height: calc(var(--rail-b, 52px) + 12px + 50svh);
+  }
+  .cp-marker,
+  .cp-marker.day {
+    padding-top: calc(var(--rail-b, 52px) + 24px + 50svh);
+  }
+  .cp-track {
+    margin-top: calc(-1 * (var(--rail-b, 52px) + 12px + 50svh));
+  }
+  .cp-moon svg {
+    width: 36px;
+    height: 36px;
+  }
+  .cp-moon-word {
+    display: none;
+  }
+  .cp-chip {
+    min-height: 32px;
+    padding: 0 9px;
+    font-size: 13px;
+  }
+  .cp-chip:not([aria-checked="true"]):not(.cp-chip-cross) .cp-chip-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+/* Short narrow windows (landscape phones): the figure stays pinned on the left and the
+   step's words sit beside it on the right, scrolling on their own when long. */
+@media (max-width: 1059px) and (max-height: 600px) {
+  .cp-stage,
+  .cp-stage.day {
+    height: calc(100svh - 60px);
+  }
+  .cp-view {
+    top: calc(var(--rail-b, 52px) + 8px);
+    right: auto;
+    width: 56%;
+    height: calc(100svh - 60px - var(--rail-b, 52px) - 8px);
+  }
+  .cp-moon {
+    display: none;
+  }
+  .cp-words-col {
+    display: flex;
+    top: calc(var(--rail-b, 52px) + 8px);
+    bottom: 8px;
+    right: 12px;
+    width: 41%;
+    align-items: flex-start;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    padding-right: 6px;
+  }
+  .cp-words-col::before {
+    display: none;
+  }
+  .cp-stage.day .cp-words-col {
+    background: #eef0f5;
+    border-radius: 12px;
+    padding: 8px;
+  }
+  .cp-title {
+    font-size: 20px;
+    margin: 4px 0 8px;
+  }
+  .cp-text.twotone {
+    font-size: 14px;
+  }
+  .cp-rule {
+    margin-top: 12px;
+    font-size: 13px;
+  }
+  .cp-card {
+    display: none;
+  }
+  .cp-marker,
+  .cp-marker.day {
+    padding-top: 0;
+  }
+  .cp-track {
+    margin-top: calc(60px - 100svh);
+  }
+}
+@media (forced-colors: active) {
+  .cp-tag,
+  .cp-ladder {
+    forced-color-adjust: none;
+    background: Canvas;
+    color: CanvasText;
+    text-shadow: none;
+  }
+  .cp-ladder {
+    border: 1px solid CanvasText;
+  }
+  .cp-tag *,
+  .cp-ladder * {
+    color: inherit !important;
+  }
+  .cp-tag.led::before,
+  .cp-tag.led::after {
+    forced-color-adjust: none;
+    background: CanvasText;
+    box-shadow: 0 0 0 1px Canvas;
+  }
+  .cp-chip[aria-checked="true"] {
+    forced-color-adjust: none;
+    background: Highlight;
+    color: HighlightText;
+    border-color: Highlight;
+  }
+  .cp-chip:focus-visible,
+  .cp-act:focus-visible,
+  .cp-skip:focus-visible {
+    outline-color: CanvasText;
+  }
+}
+
+/* Build review (2026-11-10). */
+/* Step 2: a tile that snoops flashes as the bus-master pulse passes; C3 lets it pass. */
+.cp-tile.snoop .cp-tile-edge {
+  animation: cp-snoop 0.7s ease;
+}
+@keyframes cp-snoop {
+  40% {
+    opacity: 1;
+    stroke-width: 7;
+  }
+}
+/* Your turn: a dotted ring ties the depth ladder to core 0. */
+.cp-pick {
+  fill: none;
+  stroke: #ede6d3;
+  stroke-width: 4;
+  stroke-dasharray: 2 10;
+  stroke-linecap: round;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+.cp-tile.picked .cp-pick {
+  opacity: 0.9;
+}
+/* Labels hide while the plate moves to a new frame. */
+.cp-tags.moving,
+.cp-controls.moving {
+  opacity: 0;
+  transition: none;
+}
+.cp-tags,
+.cp-controls {
+  transition: opacity 0.3s ease;
+}
+/* The skip target shows itself when it takes focus. */
+#cp-day-desc:focus {
+  position: static;
+  width: auto;
+  height: auto;
+  overflow: visible;
+  clip-path: none;
+  white-space: normal;
+  margin: 0 0 32px;
+  padding: 16px 20px;
+  border-radius: 16px;
+  background: #fff;
+  color: var(--ink);
+  outline: 2px solid #2f5d9a;
+}
+.still .cp-tile.snoop .cp-tile-edge {
+  animation: none;
+}
+@media (max-width: 1059px) {
+  /* Card controls never land under the pinned figure. */
+  .cp-card :is(a, button) {
+    scroll-margin-top: calc(var(--rail-b, 52px) + 24px + 56svh);
+  }
+  /* By day the track under the figure turns to the mat, then fades to the light part. */
+  .cp-dawn-span {
+    background: linear-gradient(180deg, var(--cp-sky), var(--cp-mat));
+  }
+  .cp-marker.day {
+    background: var(--cp-mat);
+  }
+  .cp-track::after {
+    content: "";
+    display: block;
+    height: calc(100svh - 60px);
+    background: linear-gradient(180deg, var(--cp-mat), var(--light));
+  }
+}
+@media (max-width: 480px) {
+  .cp-card :is(a, button) {
+    scroll-margin-top: calc(var(--rail-b, 52px) + 24px + 50svh);
+  }
+}

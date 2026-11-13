@@ -1,0 +1,718 @@
+/* Chapter 5, sleep and wake: one photograph, one camera. The header, the caveat
+   band and the pinned stage share the plate's own night, so they meet with no seam. Nothing is
+   drawn on the photograph but light; labels are bare text with a hairline (no boxes). */
+.chapter--sleep-wake {
+  --sw-night: #020206;
+  --sw-cream: var(--step-cream);
+}
+.chapter--sleep-wake .chapter-intro {
+  color: #c9cde0;
+}
+.sw-caveat-band {
+  padding-top: clamp(40px, 7svh, 72px);
+  padding-bottom: var(--caveat-gap);
+  background: var(--canvas);
+}
+.sw-caveat-band .sw-caveat {
+  margin-top: 0;
+  padding-bottom: 8px;
+  color: #c9cde0;
+  text-wrap: balance;
+}
+
+/* The scene: the stage pins while one marker per stop crosses the viewport; then the dawn span. */
+.sw-scene {
+  position: relative;
+  height: calc(100svh - 60px + (var(--sum) + var(--dawn-h)) * 1svh);
+  background: var(--sw-night);
+}
+.sw-stage {
+  --dawn: 0;
+  position: sticky;
+  top: 60px;
+  height: calc(100svh - 60px);
+  overflow: hidden;
+  background: var(--sw-night) linear-gradient(180deg, var(--canvas) 0, #05070f 24%, var(--sw-night) 62%);
+}
+.sw-track {
+  position: absolute;
+  inset: 0 0 auto;
+  pointer-events: none;
+}
+.sw-marker {
+  height: calc(var(--h) * 1svh);
+}
+.sw-dawn-span {
+  height: calc(var(--dawn-h) * 1svh);
+}
+.sw-card {
+  display: none;
+}
+.sw-view {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+/* No seam with the header: the top of the picture starts as the header's own night. It lies on the plate, under the labels. */
+.sw-view::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 110px;
+  background: linear-gradient(180deg, var(--canvas) 0, rgba(7, 11, 24, 0.55) 45%, transparent);
+  pointer-events: none;
+  opacity: calc(1 - var(--dawn) * 2.5);
+}
+
+/* The world is the plate at its own size; one transform frames it for the whole chapter. */
+.sw-world {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 2400px;
+  height: 1500px;
+  transform-origin: 0 0;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 3%, #000 68%, transparent 90%);
+  mask-image: linear-gradient(90deg, transparent 0, #000 3%, #000 68%, transparent 90%);
+}
+.sw-world img {
+  position: absolute;
+  max-width: none;
+}
+.sw-plate {
+  left: 0;
+  top: 0;
+  width: 2400px;
+  height: 1500px;
+}
+/* Light: the lit photograph minus the unlit one, added back. */
+.sw-lyr {
+  mix-blend-mode: screen;
+  transition: opacity 0.8s ease;
+}
+.sw-lyr.slow {
+  transition: opacity 1.4s ease;
+}
+/* The plate's right edge and the words' ground: the same night, never a panel. */
+.sw-shade {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(90deg, rgba(2, 2, 6, 0) var(--edge0, 60%), var(--sw-night) var(--edge1, 80%));
+  opacity: calc(1 - var(--dawn) * 2);
+}
+
+/* Points of light on the real parts, for bits that are set; each on a soft dark underlay,
+   so it holds on bright metal and is not taken for a reflection. */
+.sw-under {
+  position: absolute;
+  width: 84px;
+  height: 84px;
+  margin: -42px 0 0 -42px;
+  border-radius: 50%;
+  background: radial-gradient(rgba(2, 2, 6, 0.88) 0, rgba(2, 2, 6, 0.6) 40%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.sw-under.show {
+  opacity: 1;
+}
+.sw-mark {
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  margin: -13px 0 0 -13px;
+  border-radius: 50%;
+  background: #dfe8ff;
+  opacity: 0;
+  transform: scale(0.4);
+  transition:
+    opacity 0.5s ease,
+    transform 0.5s ease,
+    box-shadow 0.5s ease,
+    background 0.4s ease;
+  mix-blend-mode: screen;
+}
+.sw-mark.dim {
+  opacity: 0.95;
+  transform: scale(1);
+  box-shadow:
+    0 0 8px 2px rgba(200, 215, 255, 0.55),
+    0 0 22px 6px rgba(160, 185, 255, 0.22);
+}
+.sw-mark.on {
+  opacity: 1;
+  transform: scale(1);
+  box-shadow:
+    0 0 22px 8px rgba(200, 215, 255, 0.75),
+    0 0 70px 24px rgba(160, 185, 255, 0.35);
+}
+.sw-mark.ember {
+  opacity: 0.85;
+  transform: scale(0.7);
+  box-shadow: 0 0 16px 5px rgba(200, 215, 255, 0.45);
+}
+.sw-mark.latch {
+  opacity: 1;
+  transform: scale(1.15);
+  background: #fff;
+  box-shadow:
+    0 0 26px 10px rgba(255, 255, 255, 0.85),
+    0 0 90px 30px rgba(255, 255, 255, 0.35);
+}
+/* The hand-off is a cut, not a fade: every light obeys it. */
+.sw-world.cut .sw-lyr,
+.sw-world.cut .sw-mark,
+.sw-world.cut .sw-under {
+  transition-duration: 0.06s;
+  transition-timing-function: linear;
+}
+
+/* Labels (the shared standard): a dot on the part, a hairline, bare text in a quiet place. They paint above the top fade. */
+.sw-leaders {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: calc(1 - var(--dawn) * 4);
+}
+.sw-leaders line {
+  stroke: rgba(237, 230, 211, 0.55);
+  stroke-width: 1;
+}
+.sw-leaders circle {
+  fill: var(--sw-cream);
+}
+.sw-labels {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  pointer-events: none;
+  opacity: calc(1 - var(--dawn) * 4);
+}
+.sw-lb {
+  position: absolute;
+  display: grid;
+  width: max-content;
+  line-height: 1.2;
+  color: var(--text);
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.95),
+    0 0 5px rgba(0, 0, 0, 0.9),
+    0 0 12px rgba(0, 0, 0, 0.9),
+    0 0 26px rgba(0, 0, 0, 0.7);
+  animation: sw-in 0.5s ease both;
+}
+.sw-lb.r {
+  transform: translate(-100%, 0);
+  text-align: right;
+}
+.sw-lb b {
+  font-size: 14px;
+  font-weight: 600;
+}
+.sw-lb i {
+  font-style: normal;
+  font-size: 13px;
+  color: #d5dae8;
+}
+.sw-lb i.hot {
+  color: #fff;
+  font-weight: 600;
+}
+@keyframes sw-in {
+  from {
+    opacity: 0;
+  }
+}
+/* In Your turn the label is the button. */
+button.sw-lb {
+  pointer-events: auto;
+  cursor: pointer;
+  font: inherit;
+  background: rgba(2, 2, 6, 0.35);
+  border: 0;
+  padding: 5px 14px;
+  margin: -5px -14px;
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1px rgba(237, 230, 211, 0.45);
+  text-align: left;
+  min-height: 44px;
+  align-content: center;
+}
+button.sw-lb.r {
+  text-align: right;
+}
+button.sw-lb:hover {
+  box-shadow: inset 0 0 0 1px var(--sw-cream);
+}
+button.sw-lb[aria-pressed="true"] {
+  box-shadow: inset 0 0 0 1.5px var(--sw-cream);
+  background: rgba(237, 230, 211, 0.12);
+}
+button.sw-lb[aria-disabled="true"] {
+  cursor: default;
+}
+.sw-chip:focus-visible,
+button.sw-lb:focus-visible,
+.sw-again:focus-visible {
+  outline: 2px solid #9db7e8;
+  outline-offset: 3px;
+}
+.sw-words:focus {
+  outline: none;
+}
+/* Buttons that share one place (the four status bits; every button on narrow screens): spaced in screen px. */
+.sw-btns {
+  position: absolute;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 16px;
+  pointer-events: none;
+}
+.sw-btns button.sw-lb {
+  position: static;
+  margin: 0;
+}
+.sw-btns.low {
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  justify-content: center;
+  gap: 8px;
+}
+
+.sw-rail {
+  position: absolute;
+  z-index: 3;
+  top: 12px;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 12px;
+  opacity: calc(1 - var(--dawn) * 4);
+}
+.sw-chip {
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid #737c97;
+  background: rgba(4, 6, 16, 0.45);
+  color: #c9cde0;
+  font: 600 14px var(--sans);
+  cursor: pointer;
+}
+.sw-chip-n {
+  opacity: 0.7;
+  margin-right: 2px;
+}
+.sw-chip[aria-checked="true"] {
+  background: var(--sw-cream);
+  border-color: var(--sw-cream);
+  color: #101425;
+}
+.sw-chip[aria-checked="true"] .sw-chip-n {
+  opacity: 1;
+}
+.sw-chip-play {
+  border-color: var(--glow);
+}
+
+/* The words: in the plate's quiet right third, the app's step-text values. No panel behind them. */
+.sw-words {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  transform: translateY(-46%);
+  opacity: calc(1 - var(--dawn) * 4);
+}
+.sw-pos {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--board-muted);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 8px;
+  align-items: baseline;
+}
+.sw-pos .sw-sys::before,
+.sw-pos time::before {
+  content: "·";
+  margin-right: 8px;
+  font-family: var(--sans);
+  color: var(--board-muted);
+}
+.sw-pos time {
+  font: 500 13px var(--mono);
+  color: #d9deea;
+}
+.sw-title {
+  margin: var(--step-title-gap);
+  font: var(--step-title);
+  letter-spacing: -0.01em;
+}
+.sw-text.twotone {
+  margin: 0;
+  max-width: none;
+  font: var(--step-text);
+  color: var(--board-muted);
+}
+.sw-rule {
+  position: relative;
+  margin: var(--step-rule-gap) 0 0;
+  padding-top: var(--step-rule-pad);
+  font-size: var(--step-rule);
+  line-height: 1.5;
+  color: #d6d9e6;
+}
+.sw-rule::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 36px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--sw-cream);
+  opacity: 0.8;
+}
+.sw-rule b {
+  color: var(--sw-cream);
+  font-weight: 600;
+}
+.sw-hint {
+  margin: 12px 0 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--board-muted);
+}
+.sw-verdict.twotone {
+  margin: 18px 0 0;
+  max-width: none;
+  font-size: clamp(18px, 1.5vw, 22px);
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--board-muted);
+}
+.sw-acts {
+  margin-top: 10px;
+}
+.sw-again {
+  min-height: 44px;
+  padding: 8px 0;
+  border: 0;
+  background: none;
+  color: var(--board-muted);
+  font: 600 13px var(--sans);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+/* The ending: the same frame at dawn, scrubbed by scroll; then the light page. --dawn runs 0 to 1. */
+.sw-dawn {
+  opacity: calc(var(--dawn) * 2.2);
+}
+/* Beyond the plate's edges the room goes on in the dawn plate's own wall and floor tones, split at the plate's floor line. */
+.sw-fill {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: calc(var(--dawn) * 2.2);
+  background: linear-gradient(
+    180deg,
+    var(--light) 0,
+    #aea8a9 9%,
+    #968985 22%,
+    #978a86 calc(var(--floor, 50%) - 16px),
+    #3a2f29 calc(var(--floor, 50%) - 3px),
+    #3b2f28 calc(var(--floor, 50%) + 18px),
+    #665146 calc(var(--floor, 50%) + 19px),
+    #6a5247 calc(var(--floor, 50%) + 120px),
+    #54413a 100%
+  );
+}
+.sw-paper {
+  position: absolute;
+  inset: 0;
+  background: var(--light);
+  opacity: calc((var(--dawn) - 0.6) * 2.5);
+  pointer-events: none;
+}
+.sw-dawn-band {
+  display: none;
+}
+.chapter--sleep-wake .chapter-dawn {
+  background: linear-gradient(180deg, var(--sw-night) 0%, #1b2350 25%, #8fa6d6 58%, #e8c9b4 80%, var(--light) 100%);
+}
+.sw-light .field-cards {
+  margin-top: clamp(48px, 8svh, 80px);
+}
+.sw-table td,
+.sw-table tbody th {
+  vertical-align: top;
+}
+.sw-table td {
+  color: var(--ink-grey);
+  line-height: 1.45;
+}
+.sw-table tbody th {
+  width: 16%;
+  white-space: normal;
+}
+.sw-table td:nth-child(2) {
+  width: 24%;
+}
+.sw-table.two td:nth-child(2) {
+  width: auto;
+}
+/* The note under the table shares the table's text edges (the card's 40 px padding), left and right. */
+.sw-aside {
+  margin: 24px 40px 0;
+  font-size: 17px;
+  line-height: 1.47;
+  color: var(--ink-grey);
+}
+@media (max-width: 760px) {
+  .sw-aside {
+    margin-inline: 16px;
+  }
+}
+
+/* ?static and reduced motion: no pinning, no motion; the rail chooses the stop, each shown at rest. */
+.still .sw-scene {
+  height: auto;
+}
+.still .sw-stage {
+  position: relative;
+  top: auto;
+  height: calc(100svh - 60px);
+  min-height: 640px;
+}
+.still .sw-track,
+.still .sw-dawn,
+.still .sw-fill,
+.still .sw-paper {
+  display: none;
+}
+.still .sw-lyr,
+.still .sw-mark,
+.still .sw-under {
+  transition: none;
+}
+.still .sw-lb {
+  animation: none;
+}
+.still .sw-dawn-band {
+  display: block;
+}
+
+/* Narrow (below 1060 px, as NARROW in src/model/layout.ts): the figure pinned on top, one fixed camera on
+   the case and the monitor; each stop's words scroll past beneath it in a card. */
+@media (max-width: 1059px) {
+  .sw-scene {
+    --fig: 46svh;
+    height: calc(2 * (56px + var(--fig)) + var(--sum) * 1svh + 65svh);
+  }
+  .sw-stage {
+    z-index: 3;
+    height: calc(56px + var(--fig));
+    background: linear-gradient(180deg, var(--canvas) 56px, var(--sw-night) 56px);
+    box-shadow:
+      0 -60px 0 0 var(--canvas),
+      0 18px 24px -6px var(--sw-night);
+  }
+  .sw-view {
+    inset: 56px 0 0 0;
+  }
+  .sw-view::after {
+    height: 44px;
+  }
+  .sw-world {
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+  .sw-shade,
+  .sw-fill,
+  .sw-paper,
+  .sw-dawn,
+  .sw-dawn-span {
+    display: none;
+  }
+  .sw-dawn-band {
+    display: block;
+  }
+  .sw-rail {
+    top: 4px;
+    padding-block: 6px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    justify-content: flex-start;
+    scrollbar-width: none;
+  }
+  .sw-rail::-webkit-scrollbar {
+    display: none;
+  }
+  .sw-chip {
+    flex: none;
+  }
+  .sw-words {
+    display: none;
+  }
+  .sw-track {
+    z-index: 2;
+  }
+  .sw-marker {
+    padding-top: calc(56px + var(--fig) + 18px);
+  }
+  /* Each card holds just under the figure while its stop scrolls, so a stop that changes by scroll keeps its
+     words in view, then leaves with its marker. The reader's turn gets a screen of room to hold in. */
+  .sw-card {
+    display: block;
+    position: sticky;
+    top: calc(60px + 56px + var(--fig) + 18px);
+    width: min(640px, 100%);
+    margin: 0 auto;
+    padding: 0 20px;
+    pointer-events: auto;
+    opacity: 0.45;
+    transition: opacity 0.3s ease;
+  }
+  .sw-marker.turn {
+    height: calc(56px + var(--fig) + 110svh);
+  }
+  .sw-card :is(a, button) {
+    scroll-margin-top: calc(56px + var(--fig) + 24px);
+  }
+  .sw-marker.on .sw-card {
+    opacity: 1;
+  }
+  .sw-title {
+    font-size: 24px;
+    margin: 6px 0 10px;
+  }
+  .sw-text.twotone {
+    font-size: 16px;
+  }
+  .sw-rule {
+    margin-top: 18px;
+    padding-top: 12px;
+    font-size: 15px;
+    line-height: 1.45;
+  }
+  .sw-verdict.twotone {
+    font-size: 17px;
+  }
+  .sw-lb b,
+  .sw-lb i {
+    font-size: 12px;
+  }
+  .sw-btns button.sw-lb {
+    padding: 4px 12px;
+  }
+  .still .sw-stage {
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+  }
+  .still .sw-view {
+    position: relative;
+    inset: auto;
+    height: var(--fig, 46svh);
+    margin-top: 56px;
+  }
+  .still .sw-words {
+    display: block;
+    position: static;
+    transform: none;
+    padding: 20px 20px 28px;
+  }
+  .sw-table {
+    font-size: 15px;
+  }
+  .sw-table tbody th {
+    width: 22%;
+  }
+}
+/* Short narrow windows (a zoomed laptop, a small phone): the figure gives way so at least 45 percent of the
+   height stays free for the words, and the cards scroll freely instead of holding half hidden. */
+@media (max-width: 1059px) and (max-height: 740px) {
+  .sw-scene {
+    --fig: max(72px, min(40svh, calc(55svh - 116px)));
+  }
+  .sw-card {
+    position: static;
+  }
+}
+@media (max-width: 480px) and (min-height: 741px) {
+  .sw-scene {
+    --fig: 42svh;
+  }
+}
+@media (max-width: 480px) {
+  .sw-chip {
+    min-height: 32px;
+    padding: 0 9px;
+    font-size: 13px;
+  }
+  .sw-chip:not([aria-checked="true"]) .sw-chip-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+/* A wide but short window: the words keep to the stage and scroll inside it rather than being cut off. */
+@media (min-width: 1060px) and (max-height: 600px) {
+  .sw-words {
+    top: 56px;
+    bottom: 8px;
+    transform: none;
+    overflow-y: auto;
+    padding-right: 6px;
+  }
+  .still .sw-words {
+    top: 56px;
+  }
+}
+@media (forced-colors: active) {
+  /* The picture keeps its own colours, and so do the points of light on it. */
+  .sw-world {
+    forced-color-adjust: none;
+  }
+  .sw-lb {
+    forced-color-adjust: none;
+    background: Canvas;
+    color: CanvasText;
+    text-shadow: none;
+  }
+  .sw-lb * {
+    color: inherit !important;
+  }
+  button.sw-lb {
+    border: 1px solid CanvasText;
+    box-shadow: none;
+  }
+  button.sw-lb[aria-pressed="true"] {
+    border: 3px solid Highlight;
+  }
+  .sw-chip[aria-checked="true"] {
+    forced-color-adjust: none;
+    background: Highlight;
+    color: HighlightText;
+    border-color: Highlight;
+  }
+  .sw-chip:focus-visible,
+  button.sw-lb:focus-visible,
+  .sw-again:focus-visible {
+    outline-color: CanvasText;
+  }
+}

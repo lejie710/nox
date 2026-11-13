@@ -1,0 +1,1716 @@
+/* Chapter 1 v3: a night-time board, then dawn into the reference material.
+   These rules are chapter-scoped; the story keeps its own scene styling. */
+html[data-page="chapter"] {
+  color-scheme: dark;
+}
+html[data-page="chapter"] body {
+  background: var(--canvas);
+  color: var(--text);
+}
+/* Opposite foreground/background tones switch together to keep contrast. */
+html[data-page="chapter"] .lnav {
+  transition: none;
+}
+html[data-page="chapter"] .lnav.light {
+  background: rgba(244, 245, 248, 0.95);
+  color: var(--ink);
+  color-scheme: light;
+}
+html[data-page="chapter"] .lnav.light .links [aria-current]::after {
+  background: #8a5200;
+}
+html[data-page="chapter"] .lnav.light .links .soon {
+  opacity: 1;
+  color: var(--ink-grey);
+}
+html[data-page="chapter"] .lnav.light :focus-visible,
+.chapter-light :focus-visible {
+  outline-color: #3442a0;
+}
+.chapter-light .cite-pop::after {
+  background: var(--ink);
+  box-shadow: 0 14px 34px rgba(29, 31, 39, 0.25);
+}
+.chapter-light .cite-item {
+  color: #eef0f6;
+}
+.chapter-light .cite-n {
+  color: #b3b7c2;
+}
+.chapter-light .cite-item a {
+  color: #b9c4f5;
+}
+.chapter code {
+  font-family: var(--mono);
+  font-weight: 500;
+  font-size: 0.92em;
+  overflow-wrap: anywhere;
+}
+
+.chapter {
+  --board-muted: #a7adbd;
+  width: 100%;
+  margin: 0;
+}
+.chapter-head {
+  padding: clamp(120px, 18svh, 180px) 24px 40px;
+  text-align: center;
+}
+.chapter-eyebrow {
+  font-size: 21px;
+  font-weight: 600;
+  color: var(--board-muted);
+  margin: 0 0 8px;
+}
+.chapter-intro {
+  max-width: 860px;
+  margin: 26px auto 0;
+  color: var(--board-muted);
+}
+
+/* One complete board is pinned while its step markers (85svh each) cross the viewport. */
+/* The same room under the caveat as chapters 2 to 5, so the first screen ends in a strip of the board and shows no step text. Side-by-side layout only: below 901 px the words sit under the board, off the first screen already. */
+@media (min-width: 901px) {
+  .board-scrolly {
+    margin-top: var(--caveat-gap);
+  }
+}
+.board-scrolly {
+  --board-stage-height: calc(100svh - 60px);
+  position: relative;
+  height: calc(var(--board-stage-height) + var(--board-steps, 8) * 85svh);
+}
+.board-stage {
+  position: sticky;
+  top: 60px;
+  height: var(--board-stage-height);
+  display: flex;
+  flex-direction: column;
+  justify-content: safe center;
+  gap: 14px;
+  padding: 12px 0 16px;
+}
+.board-stage-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(300px, 1fr);
+  gap: clamp(24px, 3.5vw, 56px);
+  align-items: center;
+  width: min(1360px, 94vw);
+  margin: 0 auto;
+}
+.board-track {
+  position: absolute;
+  inset: 0 0 auto;
+  pointer-events: none;
+}
+.board-marker {
+  height: 85svh;
+}
+
+/* The measured boxes share the picture's coordinate system. */
+.board-figure {
+  position: relative;
+  margin: 0;
+  justify-self: center;
+  width: min(100%, calc((100svh - 60px - 130px) * 1.5));
+}
+.board-picture {
+  position: relative;
+}
+/* The light is the state. The photograph is as bright as the step says (--light); each part that still has
+   power is a lit window cut from the same photograph; a point of light marks where the session is (cream)
+   or what is kept to wake the machine (amber). No outlines, no key. */
+.board-picture > img.board-base {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 14px;
+  filter: brightness(var(--light, 1)) saturate(calc(0.55 + 0.45 * var(--light, 1)));
+  transition: filter 0.8s ease;
+}
+/* Each lit part is a pool of light: an oval that falls off to nothing, so it never reads as a cropped square. */
+.board-light {
+  position: absolute;
+  background-repeat: no-repeat;
+  opacity: 0;
+  transition: opacity 0.7s ease;
+  -webkit-mask-image: radial-gradient(ellipse closest-side, #000 48%, rgba(0, 0, 0, 0.55) 72%, transparent 100%);
+  mask-image: radial-gradient(ellipse closest-side, #000 48%, rgba(0, 0, 0, 0.55) 72%, transparent 100%);
+}
+.board-light.idle {
+  animation: board-breathe 3.6s ease-in-out infinite;
+}
+@keyframes board-breathe {
+  0%,
+  100% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+.board-spot {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+.board-spot.session,
+.board-spot.wake {
+  opacity: 1;
+}
+.board-mark {
+  position: absolute;
+  left: -7px;
+  top: -7px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+}
+.board-spot.session .board-mark {
+  background: var(--step-cream);
+  box-shadow:
+    0 0 0 4px rgba(7, 11, 24, 0.55),
+    0 0 18px 6px rgba(237, 230, 211, 0.7);
+}
+.board-spot.wake .board-mark {
+  background: var(--glow);
+  box-shadow:
+    0 0 0 4px rgba(7, 11, 24, 0.55),
+    0 0 14px 4px rgba(242, 169, 59, 0.6);
+}
+/* The session's name: bare cream text beside its point. */
+.board-tag {
+  position: absolute;
+  left: 0;
+  bottom: 14px;
+  transform: translateX(-50%);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--step-cream);
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.95),
+    0 0 12px rgba(0, 0, 0, 0.9);
+}
+.still .board-light.idle {
+  animation: none;
+  opacity: 0.65;
+}
+.board-hint {
+  margin: 10px 0 0;
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--board-muted);
+}
+.board-note {
+  margin: 12px 0 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--board-muted);
+}
+.board-lights {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* A lens on one part, connected to its measured box by a leader. */
+.board-callout {
+  position: absolute;
+  z-index: 3;
+  width: 27%;
+  aspect-ratio: 1;
+  transition:
+    left 0.5s ease,
+    top 0.5s ease;
+}
+/* A citation measures its final position when opened, including during a jump. */
+.board-callout:focus-within,
+.board-callout:has(.cite-pop) {
+  transition: none;
+}
+.board-lens {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 2px solid #ede6d3;
+  background-repeat: no-repeat;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
+  transition: background-position 0.5s ease;
+}
+/* The lens's caption is bare: no box, only a shadow under the letters. */
+.board-callout-text {
+  position: absolute;
+  top: 34%;
+  left: calc(100% + 16px);
+  width: max(150px, 80%);
+  margin: 0;
+  font-size: clamp(13px, 1.05vw, 15px);
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--text);
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.95),
+    0 0 12px rgba(0, 0, 0, 0.9);
+}
+.board-callout.text-left .board-callout-text {
+  left: auto;
+  right: calc(100% + 16px);
+  text-align: right;
+}
+.board-callout-name {
+  display: block;
+  color: var(--step-cream);
+  font-size: 0.9em;
+  letter-spacing: 0.02em;
+}
+.board-leader {
+  position: absolute;
+  bottom: 100%;
+  width: 2px;
+  margin-left: -1px;
+  background: #ede6d3;
+  transform-origin: 50% 100%;
+  transition:
+    height 0.5s ease,
+    transform 0.5s ease;
+  pointer-events: none;
+}
+
+/* The global-state lane names and the state radios both choose a step. */
+.board-rail {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  width: min(1360px, 94vw);
+  margin: 0 auto;
+}
+.board-lane {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.board-lane-name {
+  min-height: 36px;
+  padding: 0 6px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  font: 600 12px var(--sans);
+  color: var(--board-muted);
+  cursor: pointer;
+}
+.board-lane-name:hover {
+  color: var(--text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.board-chip {
+  min-height: 36px;
+  min-width: 44px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid #737c97;
+  background: transparent;
+  color: #c9cde0;
+  font: 600 14px var(--sans);
+  cursor: pointer;
+}
+.board-chip:hover {
+  border-color: #ede6d3;
+}
+.board-chip[aria-checked="true"] {
+  background: #ede6d3;
+  border-color: #ede6d3;
+  color: #101425;
+}
+.board-chip:focus-visible,
+.board-lane-name:focus-visible {
+  outline: 2px solid #9db7e8;
+  outline-offset: 3px;
+}
+
+.board-words {
+  min-width: 0;
+}
+/* Hidden status/parts retain their semantics without default paragraph/list margins. */
+.board-stage .sr-only {
+  margin: 0;
+}
+.board-pos {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--board-muted);
+  margin: 0;
+}
+.board-title {
+  font: var(--step-title);
+  letter-spacing: -0.01em;
+  margin: var(--step-title-gap);
+}
+.board-text.twotone {
+  font: var(--step-text);
+  color: var(--board-muted);
+  margin: 0;
+  max-width: none;
+}
+.board-readout {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.4;
+  letter-spacing: 0;
+  color: var(--board-muted);
+}
+/* The rule needs no box: a short cream line above, aligned with the text (as chapters 2 to 5). */
+.board-rule {
+  position: relative;
+  margin: var(--step-rule-gap) 0 0;
+  padding-top: var(--step-rule-pad);
+  font-size: var(--step-rule);
+  line-height: 1.5;
+  color: #d6d9e6;
+}
+.board-rule::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 36px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--step-cream);
+  opacity: 0.8;
+}
+.board-rule b {
+  color: var(--step-cream);
+  font-weight: 600;
+}
+
+/* Where the dawn band ends between two pixels, the dark page showed through as a hairline above the light
+   part; a 1 px shadow in the light part's own colour covers it (every chapter). */
+.chapter-light {
+  box-shadow: 0 -1px 0 var(--light);
+}
+.chapter-dawn {
+  height: 60svh;
+  background: linear-gradient(180deg, var(--canvas) 0%, #1b2350 25%, #8fa6d6 58%, #e8c9b4 80%, var(--light) 100%);
+}
+.chapter-light {
+  display: flow-root;
+  background: var(--light);
+  color: var(--ink);
+  color-scheme: light;
+}
+.chapter-light > * {
+  width: min(1232px, calc(100% - 2 * clamp(20px, 7vw, 104px)));
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* The names table. */
+.chapter-block {
+  margin-top: clamp(80px, 12svh, 120px);
+}
+.block-title {
+  font-size: clamp(32px, 3vw, 40px);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+  margin: 0;
+}
+.block-sub {
+  font-size: 19px;
+  color: var(--ink-grey);
+  margin: 10px 0 0;
+}
+.names-wrap {
+  margin-top: 28px;
+  background: #fff;
+  border-radius: 28px;
+  padding: 14px 40px;
+  overflow-x: auto;
+}
+.names {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 17px;
+}
+.names th,
+.names td {
+  text-align: left;
+  padding: 14px 16px 14px 0;
+  border-bottom: 1px solid #e3e6ee;
+}
+.names tbody tr:last-child > * {
+  border-bottom: 0;
+}
+.names thead th {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink-grey);
+}
+.names tbody th {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* In the field, Compare. */
+.field-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-top: clamp(64px, 10svh, 100px);
+}
+.fcard {
+  background: #fff;
+  border-radius: 28px;
+  padding: 36px 40px;
+}
+.fcard-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink-grey);
+  margin: 0;
+}
+.fcard-title {
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  line-height: 1.15;
+  margin: 8px 0 12px;
+}
+.fcard p:not(.fcard-label) {
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.47;
+  color: var(--ink-grey);
+}
+.fcard p:not(.fcard-label) + p {
+  margin-top: 12px;
+}
+.fcard code {
+  color: var(--ink);
+}
+
+/* A second, unpinned board tells the sandbox's session-survival story. */
+.sandbox {
+  width: min(1360px, 94vw);
+  margin: clamp(72px, 12svh, 120px) auto 0;
+  padding-bottom: clamp(48px, 8svh, 96px);
+  scroll-margin-top: 80px;
+}
+.sandbox > .block-sub {
+  color: var(--board-muted);
+  max-width: 680px;
+}
+.sandbox-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(300px, 1fr);
+  gap: clamp(24px, 3.5vw, 56px);
+  align-items: center;
+  margin-top: 32px;
+}
+.sandbox-board {
+  position: relative;
+  min-width: 0;
+  margin: 0;
+}
+.sandbox-board-hint {
+  margin: 6px 0 0;
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--board-muted);
+}
+.sandbox .sr-only {
+  margin: 0;
+}
+.sandbox-words {
+  min-width: 0;
+}
+.sandbox-controls {
+  display: grid;
+  gap: 18px;
+}
+.sandbox-choice {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+.sandbox-choice legend {
+  padding: 0;
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--board-muted);
+}
+.sandbox-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.sandbox-pill {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid #737c97;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #c9cde0;
+  cursor: pointer;
+}
+.sandbox-pill:hover {
+  border-color: #ede6d3;
+}
+.sandbox-pill.on {
+  background: #ede6d3;
+  border-color: #ede6d3;
+  color: #101425;
+}
+.sandbox-pill input {
+  position: absolute;
+  opacity: 0;
+  inset: 0;
+  margin: 0;
+  cursor: pointer;
+}
+.sandbox-pill:has(input:focus-visible) {
+  outline: 2px solid #9db7e8;
+  outline-offset: 3px;
+}
+.sandbox-story.twotone {
+  max-width: none;
+  margin: 28px 0 0;
+  font-size: clamp(22px, 2.1vw, 30px);
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--board-muted);
+}
+
+/* Sources, the way on, the footer. */
+.chapter-sources {
+  margin-top: clamp(80px, 12svh, 120px);
+  font-size: 12px;
+  color: var(--ink-grey);
+  line-height: 1.7;
+}
+.chapter-sources h2 {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0 0 6px;
+  color: var(--ink);
+}
+.chapter-sources ol {
+  margin: 0;
+  padding-left: 22px;
+}
+.chapter-sources a {
+  color: #3442a0;
+}
+.chapter-next {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 48px;
+  font-size: 17px;
+  font-weight: 600;
+}
+.chapter-next span {
+  color: var(--ink-grey);
+  font-weight: 400;
+}
+.chapter-footer {
+  margin-top: 40px;
+  padding: 14px 0 32px;
+  border-top: 1px solid #d9dce6;
+  font-size: 12px;
+  color: var(--ink-grey);
+}
+
+.still .board-scrolly {
+  height: auto;
+}
+.still .board-stage {
+  position: relative;
+  top: auto;
+  height: auto;
+  overflow: visible;
+  padding: 24px 0 80px;
+}
+.still .board-track {
+  display: none;
+}
+/* The motion gate also covers nav changes and the existing sandbox. */
+html.still[data-page="chapter"] *,
+html.still[data-page="chapter"] *::before,
+html.still[data-page="chapter"] *::after {
+  transition: none;
+  animation: none;
+  scroll-behavior: auto;
+}
+
+@media (max-width: 900px) {
+  /* A pool of light reaches past its part, and near the board's edge past the screen: the page must not scroll sideways for it. */
+  .chapter--big-picture {
+    overflow-x: clip;
+  }
+  .sandbox-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+    margin-top: 24px;
+  }
+  .sandbox-board,
+  .sandbox-words {
+    width: min(100%, 680px);
+    justify-self: center;
+  }
+  .sandbox-story.twotone {
+    font-size: 22px;
+  }
+  /* Phones: swatches once above the board, only the hint stays under it. */
+  .board-stage {
+    gap: 10px;
+    padding-top: 10px;
+    padding-bottom: 12px;
+  }
+  .board-stage-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+  .board-figure {
+    width: min(100%, max(240px, calc((100svh - 60px - 465px) * 1.5)));
+  }
+  .board-rail {
+    gap: 4px 14px;
+  }
+  .board-lane {
+    gap: 4px;
+  }
+  .board-lane-name {
+    min-height: 32px;
+    padding: 0 4px;
+    font-size: 11px;
+  }
+  .board-chip {
+    min-height: 32px;
+    min-width: 36px;
+    padding: 0 9px;
+    font-size: 13px;
+  }
+  .board-words {
+    max-width: 680px;
+    width: 100%;
+    margin: 0 auto;
+  }
+  .board-pos {
+    font-size: 12px;
+  }
+  .board-title {
+    margin: 5px 0 9px;
+  }
+  .board-text.twotone {
+    font-size: 17px;
+    line-height: 1.35;
+  }
+  .board-readout {
+    display: inline;
+    margin: 0;
+  }
+  .board-rule {
+    margin-top: 14px;
+    padding-top: 10px;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+  .board-callout-text {
+    top: 0;
+    width: 150px;
+    left: calc(100% + 8px);
+    font-size: 12px;
+    line-height: 1.25;
+  }
+  .board-callout.text-left .board-callout-text {
+    right: calc(100% + 8px);
+  }
+}
+@media (max-width: 760px) {
+  .names-wrap,
+  .fcard {
+    border-radius: 22px;
+    padding: 24px 20px;
+  }
+  .field-cards {
+    grid-template-columns: 1fr;
+  }
+  .names-wrap {
+    padding: 8px 16px;
+  }
+  .names {
+    font-size: 14px;
+  }
+  .names th,
+  .names td {
+    padding: 12px 10px 12px 0;
+  }
+  .names tbody th {
+    white-space: normal;
+  }
+}
+@media (max-width: 480px) {
+  .sandbox {
+    margin-top: 64px;
+  }
+  .sandbox > .block-sub {
+    font-size: 16px;
+    line-height: 1.4;
+  }
+  .sandbox-pill {
+    padding: 0 10px;
+    font-size: 13px;
+  }
+  .sandbox-story.twotone {
+    margin-top: 24px;
+    font-size: 20px;
+  }
+  .board-text.twotone {
+    font-size: 16px;
+  }
+}
+/* Short windows retain every word and control in a keyboard-scrollable stage. */
+@media (max-width: 900px) and (max-height: 700px), (min-width: 901px) and (max-height: 540px) {
+  .board-stage {
+    overflow-y: auto;
+    justify-content: flex-start;
+  }
+  .board-stage > * {
+    flex-shrink: 0;
+  }
+}
+/* Short phones: a little less text size so every step fits without the
+   inner scroll above, which stays only as a safety net. */
+@media (max-width: 900px) and (max-height: 700px) {
+  .board-stage {
+    gap: 5px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+  }
+  .board-stage-grid {
+    gap: 5px;
+  }
+  .board-figure {
+    width: min(100%, 260px);
+  }
+  .board-text.twotone {
+    font-size: 15px;
+  }
+  .board-title {
+    font-size: 24px;
+    margin: 4px 0 6px;
+  }
+  .board-rule {
+    margin-top: 10px;
+    padding-top: 8px;
+    font-size: 13px;
+  }
+}
+
+/* The caveat, once above the board section. */
+/* Every chapter: the same room between the caveat line and the pinned scene, so the
+   step rail and the top of the figure land on the first screen. */
+/* The step text of every chapter: one set of values. */
+:root {
+  --caveat-gap: clamp(60px, 10svh, 120px);
+  --step-title: 600 clamp(26px, 2.4vw, 38px)/1.1 var(--sans);
+  --step-title-gap: 8px 0 14px;
+  --step-text: 600 clamp(17px, 1.35vw, 20px)/1.38 var(--sans);
+  --step-rule: 16px;
+  --step-rule-gap: 26px;
+  --step-rule-pad: 16px;
+  --step-cream: #ede6d3;
+}
+.board-caveat {
+  width: min(1060px, 94vw);
+  margin: clamp(40px, 7svh, 72px) auto 0;
+  text-align: center;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--board-muted);
+}
+
+/* Transparent part controls sit between the lights and the existing lens. */
+.board-hotspots {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.board-hotspot {
+  position: absolute;
+  z-index: 2;
+  display: block;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  outline: 1px solid transparent;
+  outline-offset: 2px;
+  pointer-events: auto;
+  touch-action: manipulation;
+  transition: outline-color 0.15s ease;
+}
+.board-hotspot:hover {
+  outline-color: rgba(237, 230, 211, 0.65);
+}
+.board-hotspot:focus-visible {
+  outline: 2px solid #9db7e8;
+  outline-offset: 3px;
+}
+.board-hotspot-label {
+  position: absolute;
+  z-index: 4;
+  padding: 4px 6px;
+  color: var(--text);
+  font: 600 13px/1.35 var(--sans);
+  overflow-wrap: break-word;
+  pointer-events: auto;
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.95),
+    0 0 12px rgba(0, 0, 0, 0.9),
+    0 0 3px rgba(0, 0, 0, 0.9);
+}
+.board-hotspot-name {
+  display: block;
+  margin-bottom: 2px;
+  color: var(--step-cream);
+  font-weight: 600;
+}
+.board-hotspot-example {
+  display: block;
+  margin-top: 6px;
+  color: var(--board-muted);
+}
+/* Focus rings inside citation panels: visible on the panel's own colour. */
+.cite-pop :focus-visible {
+  outline-color: #3442a0;
+}
+.chapter-light .cite-pop :focus-visible {
+  outline-color: #b9c4f5;
+}
+
+/* Windows High Contrast: the selected pill and chip keep a visible fill. */
+@media (forced-colors: active) {
+  .sandbox-pill.on,
+  .board-chip[aria-checked="true"] {
+    forced-color-adjust: none;
+    background: Highlight;
+    border-color: Highlight;
+    color: HighlightText;
+  }
+  .sandbox-pill:has(input:focus-visible),
+  .board-chip:focus-visible {
+    outline-color: CanvasText;
+  }
+}
+
+/* Compare: two power models as rows of states. */
+.model-rows {
+  list-style: none;
+  margin: 18px 0 20px;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+.model-row {
+  display: grid;
+  gap: 6px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: var(--light);
+}
+.model-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-grey);
+}
+.model-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.model-chip {
+  padding: 4px 11px;
+  border-radius: 999px;
+  border: 1.5px solid var(--ink);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.model-arrow {
+  color: var(--ink-grey);
+}
+.fcard .model-note {
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--ink-grey);
+}
+
+/* Chapter 2, Modern Standby: one continuous night.
+   The header and the pinned stage share one sky fixed to the viewport, so
+   where they meet they show the same pixels: no seam before step 1. */
+.chapter--modern-standby .chapter-head {
+  position: relative;
+  isolation: isolate;
+}
+/* The header shows step 1's night: the sky with the cloud veil. */
+.chapter--modern-standby .chapter-head::before {
+  background-image: url(../assets/halo-veil.webp), url(../assets/halo-sky.webp);
+  background-size:
+    cover,
+    160% auto;
+  background-position:
+    50% 50%,
+    88% 50%;
+  background-attachment: fixed, fixed;
+  background-repeat: no-repeat;
+}
+.chapter--modern-standby .chapter-head::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+}
+/* Only the very top fades from the plain canvas under the nav into the sky. */
+.chapter--modern-standby .chapter-head::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(180deg, var(--canvas) 0, transparent 220px);
+}
+.chapter--modern-standby .chapter-intro {
+  color: #c9cde0;
+}
+/* The caveat band sits on the same fixed night as the header and the stage,
+   with chapter 1's spacing (its margin becomes padding, so no plain gap). */
+.ms-caveat-band {
+  padding-top: clamp(40px, 7svh, 72px);
+  padding-bottom: var(--caveat-gap);
+  background-image: url(../assets/halo-veil.webp), url(../assets/halo-sky.webp);
+  background-size:
+    cover,
+    160% auto;
+  background-position:
+    50% 50%,
+    88% 50%;
+  background-attachment: fixed, fixed;
+  background-repeat: no-repeat;
+  background-color: var(--canvas);
+}
+.ms-caveat-band .ms-caveat {
+  margin-top: 0;
+  padding-bottom: 8px;
+  color: #c9cde0;
+}
+
+/* The scene: eight markers of 85svh pass while one night is pinned under the nav. */
+.ms-scene {
+  position: relative;
+  height: calc(100svh - 60px + var(--steps, 8) * 85svh);
+}
+.ms-stage {
+  position: sticky;
+  top: 60px;
+  height: calc(100svh - 60px);
+  display: flex;
+  flex-direction: column;
+  justify-content: safe center;
+  gap: 14px;
+  padding: 12px 0 16px;
+  overflow: hidden;
+}
+.ms-track {
+  position: absolute;
+  inset: 0 0 auto;
+  pointer-events: none;
+}
+.ms-marker {
+  height: 85svh;
+}
+.ms-card {
+  display: none;
+}
+.ms-night {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+.ms-night > div {
+  position: absolute;
+  inset: 0;
+}
+/* The stage's sky, fixed like the header's; the veil layers fade over it. */
+.ms-sky {
+  background-image: url(../assets/halo-sky.webp);
+  background-size: 160% auto;
+  background-position: 88% 50%;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+}
+.ms-veil,
+.ms-veil-busy {
+  background-image: url(../assets/halo-veil.webp);
+  background-size: cover;
+  background-position: 50% 50%;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  opacity: 0;
+  transition: opacity 1.2s ease;
+}
+.ms-veil-busy {
+  filter: sepia(1) saturate(2.5) hue-rotate(-12deg);
+}
+.ms-stage[data-veil="awake"] .ms-veil,
+.ms-stage[data-veil="running"] .ms-veil {
+  opacity: 1;
+}
+.ms-stage[data-veil="quieting"] .ms-veil {
+  opacity: 0.45;
+}
+.ms-stage[data-veil="busy"] .ms-veil-busy {
+  opacity: 1;
+}
+.ms-deep {
+  background: #02040b;
+  opacity: var(--depth, 0);
+  transition: opacity 1.2s ease;
+}
+.ms-warm {
+  background: radial-gradient(ellipse 80% 45% at 50% 115%, rgba(242, 169, 59, 0.28), transparent 70%);
+  opacity: 0;
+  transition: opacity 1.2s ease;
+}
+.ms-stage.warm .ms-warm {
+  opacity: 1;
+}
+/* Leaving the scene: the night's lower edge fades into the canvas above the dawn. */
+.ms-fade {
+  background: linear-gradient(180deg, transparent 40%, var(--canvas) 100%);
+  opacity: calc(var(--exit, 0) * 4);
+}
+
+.ms-rail {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  width: min(1360px, 94vw);
+  margin: 0 auto;
+}
+.ms-chip {
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid #737c97;
+  background: rgba(7, 11, 24, 0.35);
+  color: #c9cde0;
+  font: 600 14px var(--sans);
+  cursor: pointer;
+}
+.ms-chip-n {
+  opacity: 0.7;
+  margin-right: 2px;
+}
+.ms-chip[aria-checked="true"] {
+  background: #ede6d3;
+  border-color: #ede6d3;
+  color: #101425;
+}
+.ms-chip[aria-checked="true"] .ms-chip-n {
+  opacity: 1;
+}
+.ms-chip-play {
+  border-color: var(--glow);
+}
+.ms-chip:focus-visible {
+  outline: 2px solid #9db7e8;
+  outline-offset: 3px;
+}
+
+.ms-grid {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: auto minmax(300px, 440px);
+  justify-content: center;
+  align-items: center;
+  gap: clamp(24px, 3vw, 48px);
+  width: min(1360px, 94vw);
+  margin: 0 auto;
+}
+.ms-halo-area {
+  position: relative;
+}
+/* The halo floats on the night, no frame; room on its right for the ring labels. */
+.ms-halo-box {
+  position: relative;
+  width: min(calc(100svh - 156px), 52vw);
+  aspect-ratio: 1;
+  margin-right: 190px;
+  transform: translateY(calc(var(--exit, 0) * -12svh));
+}
+.ms-halo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* Rings. Awake: a warm luminous halo. Met: gone, a faint ember outline.
+   Listening: a cream pilot glow (network's documented exception). */
+.ms-soc {
+  fill: rgba(237, 230, 211, 0.035);
+  stroke: #ede6d3;
+  stroke-width: 1.5;
+  stroke-dasharray: 4 8;
+  opacity: 0.55;
+}
+.ms-soc-label {
+  fill: #ede6d3;
+  font: 600 26px var(--sans);
+  letter-spacing: 0.08em;
+  opacity: 0.7;
+}
+.ms-ring-glow {
+  fill: none;
+  stroke: var(--glow);
+  stroke-width: 0;
+  opacity: 0;
+  transition:
+    opacity 0.5s ease,
+    stroke-width 0.5s ease;
+}
+.ms-ring-line {
+  fill: none;
+  stroke: #ede6d3;
+  stroke-width: 1.5;
+  opacity: 0.22;
+  transition:
+    opacity 0.5s ease,
+    stroke 0.5s ease,
+    stroke-width 0.5s ease;
+}
+.ms-ring-hit {
+  fill: none;
+  stroke: transparent;
+  stroke-width: 34;
+  pointer-events: stroke;
+  cursor: pointer;
+}
+.ms-ring-n {
+  fill: var(--text);
+  font: 700 40px var(--sans);
+  paint-order: stroke;
+  stroke: #070b18;
+  stroke-width: 8px;
+}
+.ms-ring[data-state="awake"] .ms-ring-glow,
+.ms-ring[data-state="running"] .ms-ring-glow {
+  stroke-width: 26;
+  opacity: 0.5;
+}
+.ms-ring[data-state="awake"] .ms-ring-line,
+.ms-ring[data-state="running"] .ms-ring-line {
+  stroke: var(--glow);
+  stroke-width: 3;
+  opacity: 0.9;
+}
+.ms-ring[data-state="listening"] .ms-ring-line {
+  stroke-width: 3;
+  stroke-dasharray: 2 10;
+  stroke-linecap: round;
+  opacity: 0.75;
+  animation: ms-pilot 3.2s ease-in-out infinite;
+}
+.ms-ring[data-state="busy"] .ms-ring-glow {
+  stroke-width: 34;
+  opacity: 0.7;
+}
+.ms-ring[data-state="busy"] .ms-ring-line {
+  stroke: #ffc56b;
+  stroke-width: 5;
+  opacity: 1;
+}
+.ms-ring[data-state="waiting"] .ms-ring-line {
+  stroke: var(--glow);
+  stroke-width: 3;
+  stroke-dasharray: 14 12;
+  opacity: 0.7;
+}
+@keyframes ms-pilot {
+  50% {
+    opacity: 0.35;
+  }
+}
+.has-focus .ms-ring:not(.focus) .ms-ring-glow,
+.has-focus .ms-ring:not(.focus) .ms-ring-line {
+  opacity: 0.3;
+}
+
+/* The moon (the SoC-wide state), cut with the site's phase geometry. */
+.ms-moon {
+  opacity: calc(1 - var(--exit, 0) * 1.6);
+}
+.ms-moon-dark {
+  opacity: 0.16;
+}
+.ms-moon-edge {
+  fill: none;
+  stroke: #ede6d3;
+  stroke-width: 2;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+.ms-moon.focus .ms-moon-edge {
+  opacity: 0.7;
+}
+.ms-soc-word {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 63%;
+  margin: 0;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+}
+.ms-soc-word.open {
+  color: #ede6d3;
+}
+.ms-soc-word.shut {
+  color: var(--glow);
+}
+
+/* Labels on each ring's upper-right arc. */
+.ms-labels {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.ms-label-at {
+  position: absolute;
+  transform: translate(-7px, -50%);
+}
+.ms-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 4px 12px 4px 4px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(7, 11, 24, 0.6);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  white-space: nowrap;
+  pointer-events: auto;
+}
+.ms-label-dot {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #4a5374;
+  box-shadow: 0 0 0 3px rgba(7, 11, 24, 0.9);
+}
+.ms-label-text {
+  display: grid;
+  line-height: 1.2;
+}
+.ms-label-name {
+  font-size: 14px;
+  font-weight: 600;
+}
+.ms-label-state {
+  font-size: 13px;
+  color: var(--board-muted);
+}
+.ms-label-where {
+  font-size: 11px;
+  color: #959cb0;
+}
+.ms-label[data-state="awake"] .ms-label-dot,
+.ms-label[data-state="running"] .ms-label-dot,
+.ms-label[data-state="quieting"] .ms-label-dot {
+  background: var(--glow);
+}
+.ms-label[data-state="awake"] .ms-label-state,
+.ms-label[data-state="running"] .ms-label-state,
+.ms-label[data-state="quieting"] .ms-label-state {
+  color: var(--glow);
+}
+.ms-label[data-state="met"] .ms-label-dot,
+.ms-label[data-state="quiet"] .ms-label-dot {
+  background: #ede6d3;
+  opacity: 0.55;
+}
+.ms-label[data-state="busy"] {
+  background: rgba(242, 169, 59, 0.28);
+}
+.ms-label[data-state="busy"] .ms-label-dot {
+  background: var(--glow);
+  box-shadow: 0 0 10px 3px rgba(242, 169, 59, 0.7);
+}
+.ms-label[data-state="busy"] .ms-label-state {
+  color: #ffd59a;
+  font-weight: 600;
+}
+.ms-label[data-state="waiting"] .ms-label-dot {
+  background: transparent;
+  outline: 2px dashed var(--glow);
+  outline-offset: -2px;
+}
+.ms-label[data-state="waiting"] .ms-label-state {
+  color: var(--glow);
+}
+.has-focus .ms-label:not(.focus) .ms-label-name {
+  color: #a7adbd;
+}
+.ms-label.focus {
+  box-shadow: inset 0 0 0 1px rgba(237, 230, 211, 0.55);
+}
+button.ms-label {
+  cursor: pointer;
+  box-shadow: inset 0 0 0 1px #5a6386;
+}
+button.ms-label:hover {
+  box-shadow: inset 0 0 0 1px #ede6d3;
+}
+button.ms-label:focus-visible,
+.ms-key-chip:focus-visible {
+  outline: 2px solid #9db7e8;
+  outline-offset: 2px;
+}
+.ms-veil-label {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+.ms-key {
+  display: none;
+}
+
+/* The words. The rule needs no box: a short moon line above, aligned with the text. */
+.ms-words {
+  min-width: 0;
+}
+.ms-pos {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--board-muted);
+}
+.ms-title {
+  margin: var(--step-title-gap);
+  font: var(--step-title);
+  letter-spacing: -0.01em;
+}
+.ms-text.twotone {
+  margin: 0;
+  max-width: none;
+  font: var(--step-text);
+  color: var(--board-muted);
+}
+.ms-rule {
+  position: relative;
+  margin: var(--step-rule-gap) 0 0;
+  padding-top: var(--step-rule-pad);
+  font-size: var(--step-rule);
+  line-height: 1.5;
+  color: #d6d9e6;
+}
+.ms-rule::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 36px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--step-cream);
+  opacity: 0.8;
+}
+.ms-rule b {
+  color: var(--step-cream);
+  font-weight: 600;
+}
+.ms-story.twotone {
+  margin: 20px 0 0;
+  max-width: none;
+  font-size: clamp(20px, 1.8vw, 26px);
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--board-muted);
+}
+.ms-hint {
+  margin: 14px 0 0;
+  font-size: 13px;
+  color: var(--board-muted);
+}
+.ms-fig-note {
+  margin: 22px 0 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: #959cb0;
+}
+.ms-fig-note.ms-step-note {
+  color: #ede6d3;
+}
+.ms-fig-note + .ms-fig-note {
+  margin-top: 6px;
+}
+/* Only the top margin: the side margins stay the light part's own (auto), so the line sits in the cards' column. */
+.ms-names-link {
+  margin-top: 28px;
+  margin-bottom: 0;
+  font-size: 15px;
+  color: var(--ink-grey);
+}
+.ms-names-link a {
+  color: var(--ink);
+}
+
+/* ?static and reduced motion: no pinning, no pulses, the rail chooses the step. */
+.still .ms-scene {
+  height: auto;
+}
+.still .ms-stage {
+  position: relative;
+  top: auto;
+  height: auto;
+  min-height: calc(100svh - 60px);
+}
+.still .ms-track {
+  display: none;
+}
+.still .ms-ring-line {
+  animation: none;
+}
+
+/* Short desktop windows: labels one size smaller. */
+@media (max-height: 680px) and (min-width: 1101px) {
+  .ms-label-state {
+    font-size: 11px;
+  }
+  .ms-label {
+    padding-block: 2px;
+  }
+}
+
+/* Tablets and phones: the halo is pinned on top; each step's words scroll
+   past beneath it in a card, the usual mobile scrollytelling pattern. */
+@media (max-width: 1100px) {
+  .ms-grid {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    align-content: start;
+    padding-top: 10px;
+  }
+  .ms-halo-box {
+    width: min(80vw, calc(52svh - 60px), 520px);
+    margin-right: 0;
+  }
+  .ms-labels,
+  .ms-veil-label {
+    display: none;
+  }
+  .ms-key {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 10px;
+  }
+  .ms-card-toggles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 16px;
+  }
+  .ms-key-chip {
+    display: inline-flex;
+    align-items: center;
+    min-height: 32px;
+    padding: 0 10px;
+    border-radius: 999px;
+    border: 1px solid #4a5374;
+    background: rgba(7, 11, 24, 0.5);
+    color: #c9cde0;
+    font: 600 12px var(--sans);
+  }
+  button.ms-key-chip {
+    min-height: 40px;
+    cursor: pointer;
+    border-color: #737c97;
+  }
+  .ms-key-chip[data-state="awake"],
+  .ms-key-chip[data-state="running"],
+  .ms-key-chip[data-state="quieting"] {
+    border-color: var(--glow);
+    color: var(--glow);
+  }
+  .ms-key-chip[data-state="busy"] {
+    background: rgba(242, 169, 59, 0.3);
+    border-color: var(--glow);
+    color: var(--text);
+  }
+  .ms-key-chip[data-state="waiting"] {
+    border-style: dashed;
+    border-color: var(--glow);
+    color: var(--glow);
+  }
+  .ms-words {
+    display: none;
+  }
+  /* The pinned stage holds only the rail, halo and key, and sits above the
+     cards, which scroll up beneath it over the same night. */
+  .ms-scene {
+    background-image: url(../assets/halo-sky.webp);
+    background-size: 160% auto;
+    background-position: 88% 50%;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    background-color: var(--canvas);
+  }
+  .ms-stage {
+    z-index: 3;
+    height: auto;
+    padding-bottom: 14px;
+    background-color: var(--canvas);
+  }
+  /* The cards scroll up under the nav; a band of the night behind it keeps their text from showing through. */
+  .ms-stage {
+    box-shadow: 0 -60px 0 0 var(--canvas);
+  }
+  /* Its lower edge fades into the night the cards scroll over. */
+  .ms-stage::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -24px;
+    height: 24px;
+    background: linear-gradient(180deg, rgba(7, 11, 24, 0.9), transparent);
+    pointer-events: none;
+  }
+  .ms-grid {
+    flex: none;
+  }
+  .ms-track {
+    z-index: 2;
+  }
+  .ms-marker {
+    padding-top: 62svh;
+  }
+  .ms-card {
+    display: block;
+    width: min(640px, 92vw);
+    margin: 0 auto;
+    padding: 18px 18px 20px;
+    border-radius: 18px;
+    background: rgba(7, 11, 24, 0.9);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+    pointer-events: auto;
+  }
+  .still .ms-words {
+    display: block;
+    width: min(640px, 100%);
+  }
+}
+@media (max-width: 480px) {
+  .ms-chip {
+    min-height: 32px;
+    padding: 0 9px;
+    font-size: 13px;
+  }
+  .ms-chip:not([aria-checked="true"]) .ms-chip-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+@media (forced-colors: active) {
+  .ms-ring-glow {
+    display: none;
+  }
+  .ms-ring-line {
+    forced-color-adjust: none;
+    stroke: CanvasText;
+  }
+  .ms-ring[data-state="awake"] .ms-ring-line,
+  .ms-ring[data-state="busy"] .ms-ring-line,
+  .ms-ring[data-state="running"] .ms-ring-line {
+    stroke: Highlight;
+    stroke-width: 6;
+  }
+  .ms-label,
+  .ms-key-chip {
+    forced-color-adjust: none;
+    background: Canvas;
+    color: CanvasText;
+    border: 1px solid CanvasText;
+  }
+  .ms-label *,
+  .ms-key-chip * {
+    color: inherit !important;
+  }
+  .ms-label-dot {
+    background: CanvasText !important;
+    box-shadow: none !important;
+  }
+  .ms-label[data-state="busy"],
+  .ms-key-chip[data-state="busy"] {
+    background: Highlight;
+    color: HighlightText;
+  }
+  .ms-label[data-state="busy"] .ms-label-dot {
+    background: HighlightText !important;
+  }
+  .ms-chip[aria-checked="true"] {
+    forced-color-adjust: none;
+    background: Highlight;
+    color: HighlightText;
+    border-color: Highlight;
+  }
+  .ms-chip:focus-visible,
+  button.ms-label:focus-visible,
+  .ms-key-chip:focus-visible {
+    outline-color: CanvasText;
+  }
+}
